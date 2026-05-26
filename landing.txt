@@ -1,0 +1,467 @@
+import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Hammer,
+  Home,
+  Building2,
+  ClipboardCheck,
+  MessageCircle,
+  ShieldCheck,
+  Ruler,
+  Star,
+  CheckCircle2,
+  ArrowRight,
+  MapPin,
+  Phone,
+  Clock,
+  Wrench,
+  HardHat,
+  Image as ImageIcon,
+} from "lucide-react";
+
+const BUSINESS = {
+  name: "Empreiteira Silva",
+  city: "Sua Cidade e Região",
+  phoneDisplay: "(00) 00000-0000",
+  whatsappNumber: "5500000000000",
+  instagram: "@suaempreiteira",
+  years: "15+",
+};
+
+const services = [
+  {
+    icon: Home,
+    title: "Construção do zero",
+    text: "Execução de casas, sobrados e imóveis comerciais com planejamento por etapas.",
+  },
+  {
+    icon: Wrench,
+    title: "Reformas completas",
+    text: "Reforma geral de casas, apartamentos, áreas comerciais e imóveis para venda ou locação.",
+  },
+  {
+    icon: Ruler,
+    title: "Ampliações e acabamentos",
+    text: "Construção de novos cômodos, troca de pisos, revestimentos, pintura, forro e ajustes finais.",
+  },
+  {
+    icon: Building2,
+    title: "Banheiros, cozinhas e áreas externas",
+    text: "Ambientes que exigem cuidado com hidráulica, impermeabilização, acabamento e funcionalidade.",
+  },
+];
+
+const process = [
+  "Você envia fotos, medidas aproximadas e explica o que quer fazer.",
+  "Nossa equipe faz uma análise inicial e entende o escopo da obra.",
+  "Agendamos uma visita técnica quando o projeto tem perfil para execução.",
+  "Você recebe uma proposta clara com etapas, prazos e condições.",
+];
+
+const portfolio = [
+  "Antes e depois de reforma completa",
+  "Construção residencial em andamento",
+  "Acabamento de banheiro e cozinha",
+  "Área externa, piso e pintura",
+];
+
+const faqs = [
+  {
+    q: "Vocês fazem orçamento pelo WhatsApp?",
+    a: "Fazemos uma análise inicial pelo WhatsApp com base em fotos, vídeos e informações do imóvel. Para orçamento fechado, normalmente é necessária uma visita técnica.",
+  },
+  {
+    q: "Atendem obras pequenas?",
+    a: "Atendemos reformas, ampliações, acabamentos e construções. O atendimento depende da região, disponibilidade da equipe e tamanho do serviço.",
+  },
+  {
+    q: "Vocês trabalham com contrato?",
+    a: "Sim. Para obras maiores, recomendamos proposta formal, cronograma e contrato para dar mais segurança ao cliente e à equipe.",
+  },
+  {
+    q: "A visita técnica é gratuita?",
+    a: "Depende do tipo de obra, distância e complexidade. A condição é informada no atendimento inicial.",
+  },
+];
+
+function whatsappLink(message) {
+  return `https://wa.me/${BUSINESS.whatsappNumber}?text=${encodeURIComponent(message)}`;
+}
+
+function SectionBadge({ children }) {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm">
+      <CheckCircle2 className="h-4 w-4" />
+      {children}
+    </div>
+  );
+}
+
+function CTAButton({ children, message, variant = "dark" }) {
+  const classes =
+    variant === "light"
+      ? "bg-white text-neutral-950 hover:bg-neutral-100"
+      : "bg-neutral-950 text-white hover:bg-neutral-800";
+
+  return (
+    <a
+      href={whatsappLink(message)}
+      target="_blank"
+      rel="noreferrer"
+      className={`inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold shadow-lg transition ${classes}`}
+    >
+      {children}
+      <ArrowRight className="h-4 w-4" />
+    </a>
+  );
+}
+
+export default function LandingPageEmpreiteira() {
+  const [form, setForm] = useState({
+    name: "",
+    neighborhood: "",
+    service: "Reforma completa",
+    details: "",
+  });
+
+  const formMessage = useMemo(() => {
+    return `Olá, gostaria de solicitar uma análise inicial para obra/reforma.\n\nNome: ${form.name || "Não informado"}\nBairro/Cidade: ${form.neighborhood || "Não informado"}\nTipo de serviço: ${form.service}\nDetalhes: ${form.details || "Não informado"}`;
+  }, [form]);
+
+  return (
+    <main className="min-h-screen bg-neutral-50 text-neutral-950">
+      <header className="sticky top-0 z-50 border-b border-neutral-200 bg-white/85 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <a href="#top" className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-950 text-white shadow-md">
+              <HardHat className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-base font-bold leading-none">{BUSINESS.name}</p>
+              <p className="mt-1 text-xs text-neutral-500">Construção • Reforma • Acabamento</p>
+            </div>
+          </a>
+
+          <nav className="hidden items-center gap-7 text-sm font-medium text-neutral-700 md:flex">
+            <a href="#servicos" className="hover:text-neutral-950">Serviços</a>
+            <a href="#processo" className="hover:text-neutral-950">Como funciona</a>
+            <a href="#portfolio" className="hover:text-neutral-950">Portfólio</a>
+            <a href="#orcamento" className="hover:text-neutral-950">Orçamento</a>
+          </nav>
+
+          <a
+            href={whatsappLink("Olá, gostaria de pedir um orçamento para obra ou reforma.")}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden items-center gap-2 rounded-2xl bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-neutral-800 sm:inline-flex"
+          >
+            <MessageCircle className="h-4 w-4" /> WhatsApp
+          </a>
+        </div>
+      </header>
+
+      <section id="top" className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.08),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(0,0,0,0.06),transparent_35%)]" />
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-24">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className="flex flex-col justify-center"
+          >
+            <SectionBadge>Atendimento em {BUSINESS.city}</SectionBadge>
+            <h1 className="mt-6 max-w-3xl text-4xl font-black tracking-tight text-neutral-950 sm:text-5xl lg:text-6xl">
+              Reforma e construção com orçamento claro, equipe confiável e execução do início ao fim.
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-650">
+              Envie fotos do imóvel e explique o que deseja fazer. Nossa equipe avalia o serviço, orienta os próximos passos e agenda uma visita técnica quando necessário.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <CTAButton message="Olá, quero solicitar uma análise inicial para obra ou reforma. Posso enviar fotos do imóvel?">
+                Solicitar orçamento pelo WhatsApp
+              </CTAButton>
+              <a
+                href="#servicos"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-100"
+              >
+                Ver serviços
+              </a>
+            </div>
+
+            <div className="mt-10 grid max-w-2xl grid-cols-3 gap-3">
+              <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                <p className="text-2xl font-black">{BUSINESS.years}</p>
+                <p className="mt-1 text-xs leading-5 text-neutral-500">anos de experiência em obra</p>
+              </div>
+              <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                <p className="text-2xl font-black">24h</p>
+                <p className="mt-1 text-xs leading-5 text-neutral-500">para análise inicial</p>
+              </div>
+              <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                <p className="text-2xl font-black">100%</p>
+                <p className="mt-1 text-xs leading-5 text-neutral-500">foco em obra bem executada</p>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="relative"
+          >
+            <div className="rounded-[2rem] border border-neutral-200 bg-white p-4 shadow-2xl">
+              <div className="flex aspect-[4/3] items-center justify-center rounded-[1.5rem] bg-neutral-200 text-neutral-500">
+                <div className="text-center">
+                  <ImageIcon className="mx-auto h-12 w-12" />
+                  <p className="mt-3 text-sm font-semibold">Substitua por foto real de obra</p>
+                  <p className="mt-1 text-xs">Antes/depois, fachada, acabamento ou equipe trabalhando</p>
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                {portfolio.slice(0, 3).map((item) => (
+                  <div key={item} className="rounded-2xl bg-neutral-100 p-3 text-xs font-medium text-neutral-600">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="absolute -bottom-5 -left-4 max-w-xs rounded-3xl border border-neutral-200 bg-white p-4 shadow-xl">
+              <div className="flex items-start gap-3">
+                <div className="rounded-2xl bg-neutral-950 p-2 text-white">
+                  <Star className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold">Prova social importa</p>
+                  <p className="mt-1 text-xs leading-5 text-neutral-600">Use avaliações reais, fotos próprias e depoimentos de clientes atendidos.</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section id="servicos" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="max-w-3xl">
+          <SectionBadge>Serviços principais</SectionBadge>
+          <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">O que podemos executar</h2>
+          <p className="mt-4 text-base leading-7 text-neutral-600">
+            O site deve atrair serviços com bom ticket e evitar virar uma central de pequenos reparos pouco rentáveis. Abaixo estão os serviços mais comerciais para começar.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {services.map((service) => {
+            const Icon = service.icon;
+            return (
+              <motion.div
+                key={service.title}
+                whileHover={{ y: -4 }}
+                className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm transition hover:shadow-xl"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-neutral-950 text-white">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <h3 className="mt-5 text-lg font-bold">{service.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-neutral-600">{service.text}</p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="bg-neutral-950 py-16 text-white">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white">
+              <ShieldCheck className="h-4 w-4" />
+              Confiança vende obra
+            </div>
+            <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">Seu cliente não quer só preço. Ele quer reduzir risco.</h2>
+            <p className="mt-4 text-base leading-7 text-neutral-300">
+              Por isso, o atendimento precisa transmitir organização: escopo, prazos, etapas, registro da obra, proposta formal e comunicação clara.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              "Fotos reais de obras executadas",
+              "Atendimento direto pelo WhatsApp",
+              "Proposta clara por etapa",
+              "Cronograma de execução",
+              "Contrato para obras maiores",
+              "Equipe experiente e local",
+            ].map((item) => (
+              <div key={item} className="flex items-start gap-3 rounded-3xl border border-white/10 bg-white/5 p-5">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+                <p className="text-sm font-medium leading-6 text-neutral-100">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="processo" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="max-w-3xl">
+          <SectionBadge>Como funciona</SectionBadge>
+          <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">Processo simples para sair da ideia e chegar na proposta</h2>
+        </div>
+
+        <div className="mt-10 grid gap-4 lg:grid-cols-4">
+          {process.map((step, index) => (
+            <div key={step} className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-950 text-sm font-black text-white">
+                {index + 1}
+              </div>
+              <p className="mt-5 text-sm leading-6 text-neutral-700">{step}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="portfolio" className="bg-white py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div className="max-w-3xl">
+              <SectionBadge>Portfólio</SectionBadge>
+              <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">Obras reais geram confiança antes da primeira conversa</h2>
+              <p className="mt-4 text-base leading-7 text-neutral-600">
+                Substitua estes blocos por fotos reais. Priorize antes/depois, acabamento final, equipe trabalhando e detalhes técnicos.
+              </p>
+            </div>
+            <CTAButton message="Olá, vi o portfólio e gostaria de conversar sobre minha obra.">
+              Conversar sobre minha obra
+            </CTAButton>
+          </div>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {portfolio.map((item) => (
+              <div key={item} className="overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-sm">
+                <div className="flex aspect-square items-center justify-center text-neutral-500">
+                  <ImageIcon className="h-10 w-10" />
+                </div>
+                <div className="border-t border-neutral-200 bg-white p-4">
+                  <p className="text-sm font-bold">{item}</p>
+                  <p className="mt-1 text-xs text-neutral-500">Inserir foto real e legenda objetiva.</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="orcamento" className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
+        <div className="rounded-[2rem] bg-neutral-950 p-8 text-white shadow-2xl lg:p-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium">
+            <ClipboardCheck className="h-4 w-4" />
+            Pedido de análise inicial
+          </div>
+          <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">Peça uma análise para sua obra ou reforma</h2>
+          <p className="mt-4 text-base leading-7 text-neutral-300">
+            Preencha os dados principais e envie pelo WhatsApp. Quanto mais detalhes, melhor será a primeira avaliação.
+          </p>
+
+          <div className="mt-8 space-y-4 text-sm text-neutral-200">
+            <div className="flex items-center gap-3"><MapPin className="h-5 w-5" /> Atendimento em {BUSINESS.city}</div>
+            <div className="flex items-center gap-3"><Phone className="h-5 w-5" /> {BUSINESS.phoneDisplay}</div>
+            <div className="flex items-center gap-3"><Clock className="h-5 w-5" /> Análise inicial em até 24h úteis</div>
+          </div>
+        </div>
+
+        <form
+          className="rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-xl sm:p-8"
+          onSubmit={(event) => {
+            event.preventDefault();
+            window.open(whatsappLink(formMessage), "_blank");
+          }}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block">
+              <span className="text-sm font-semibold text-neutral-700">Nome</span>
+              <input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Seu nome"
+                className="mt-2 w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-950"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-semibold text-neutral-700">Bairro/Cidade</span>
+              <input
+                value={form.neighborhood}
+                onChange={(e) => setForm({ ...form, neighborhood: e.target.value })}
+                placeholder="Ex.: Centro, Campinas"
+                className="mt-2 w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-950"
+              />
+            </label>
+          </div>
+
+          <label className="mt-4 block">
+            <span className="text-sm font-semibold text-neutral-700">Tipo de serviço</span>
+            <select
+              value={form.service}
+              onChange={(e) => setForm({ ...form, service: e.target.value })}
+              className="mt-2 w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-950"
+            >
+              <option>Reforma completa</option>
+              <option>Construção do zero</option>
+              <option>Ampliação</option>
+              <option>Banheiro ou cozinha</option>
+              <option>Acabamento</option>
+              <option>Outro serviço</option>
+            </select>
+          </label>
+
+          <label className="mt-4 block">
+            <span className="text-sm font-semibold text-neutral-700">Explique o que deseja fazer</span>
+            <textarea
+              value={form.details}
+              onChange={(e) => setForm({ ...form, details: e.target.value })}
+              placeholder="Ex.: Quero reformar a cozinha, trocar piso, mexer na hidráulica e pintar. O imóvel fica no bairro X."
+              rows={5}
+              className="mt-2 w-full resize-none rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-950"
+            />
+          </label>
+
+          <button
+            type="submit"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-5 py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-neutral-800"
+          >
+            Enviar pedido pelo WhatsApp
+            <MessageCircle className="h-4 w-4" />
+          </button>
+
+          <p className="mt-4 text-xs leading-5 text-neutral-500">
+            Este formulário não gera orçamento final automático. A proposta depende da análise técnica, escopo, localização, materiais e disponibilidade da equipe.
+          </p>
+        </form>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+        <div className="rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+          <h2 className="text-2xl font-black tracking-tight">Dúvidas frequentes</h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {faqs.map((faq) => (
+              <div key={faq.q} className="rounded-3xl bg-neutral-50 p-5">
+                <h3 className="text-sm font-bold">{faq.q}</h3>
+                <p className="mt-2 text-sm leading-6 text-neutral-600">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-neutral-200 bg-white">
+        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 px-4 py-8 text-sm text-neutral-600 sm:px-6 md:flex-row md:items-center lg:px-8">
+          <p>© {new Date().getFullYear()} {BUSINESS.name}. Construção civil, reformas e acabamentos.</p>
+          <div className="flex flex-wrap gap-4">
+            <span>{BUSINESS.instagram}</span>
+            <span>{BUSINESS.phoneDisplay}</span>
+            <span>{BUSINESS.city}</span>
+          </div>
+        </div>
+      </footer>
+    </main>
+  );
+}

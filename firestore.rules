@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /leads/{leadId} {
+      // Anyone can create a lead (public form submission)
+      allow create: if
+        request.resource.data.keys().hasAll(['name', 'phone', 'serviceType', 'source', 'status', 'createdAt', 'updatedAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 200
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() > 0
+        && request.resource.data.source == 'site'
+        && request.resource.data.status == 'novo'
+        && request.resource.data.serviceType in [
+             'Construção do zero',
+             'Reforma completa',
+             'Ampliação',
+             'Banheiro/cozinha',
+             'Acabamento',
+             'Telhado',
+             'Outro'
+           ];
+
+      // Only authenticated admins can read leads
+      allow read: if request.auth != null;
+
+      // Only authenticated admins can update status and internalNotes
+      allow update: if
+        request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'internalNotes', 'updatedAt'])
+        && (
+          !request.resource.data.keys().hasAny(['status'])
+          || request.resource.data.status in [
+               'novo',
+               'em_atendimento',
+               'visita_agendada',
+               'proposta_enviada',
+               'fechado',
+               'perdido'
+             ]
+        );
+
+      // Only authenticated admins can delete
+      allow delete: if request.auth != null;
+    }
+  }
+}

@@ -1,0 +1,58 @@
+import type { PortfolioItem } from '../types/PortfolioItem'
+
+export const portfolioItems: PortfolioItem[] = [
+  {
+    id: '1',
+    title: 'Reforma completa de apartamento',
+    category: 'Reforma completa',
+    location: 'Centro',
+    description: 'Reforma geral com troca de piso, renovação elétrica, hidráulica e pintura completa.',
+    imageUrl: '',
+    status: 'concluida',
+  },
+  {
+    id: '2',
+    title: 'Construção residencial',
+    category: 'Construção do zero',
+    location: 'Jardim das Flores',
+    description: 'Casa de 120m² construída do zero com acabamento completo em 8 meses.',
+    imageUrl: '',
+    status: 'concluida',
+  },
+  {
+    id: '3',
+    title: 'Reforma de banheiro e cozinha',
+    category: 'Banheiro/cozinha',
+    location: 'Vila Nova',
+    description: 'Reforma completa de banheiro e cozinha com novos revestimentos e bancadas.',
+    imageUrl: '',
+    status: 'concluida',
+  },
+  {
+    id: '4',
+    title: 'Área externa, piso e pergolado',
+    category: 'Acabamento',
+    location: 'Bairro Alto',
+    description: 'Construção de área de lazer com pergolado, piso intertravado e pintura externa.',
+    imageUrl: '',
+    status: 'concluida',
+  },
+  {
+    id: '5',
+    title: 'Ampliação de cômodo',
+    category: 'Ampliação',
+    location: 'Santa Cruz',
+    description: 'Ampliação de suíte com closet e banheiro privativo.',
+    imageUrl: '',
+    status: 'em_andamento',
+  },
+  {
+    id: '6',
+    title: 'Reforma de telhado',
+    category: 'Telhado',
+    location: 'Jardim América',
+    description: 'Troca completa de telhado com calhas novas e impermeabilização.',
+    imageUrl: '',
+    status: 'concluida',
+  },
+]
