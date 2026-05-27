@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { CheckCircle2, ArrowRight, MessageCircle, Image as ImageIcon } from 'lucide-react'
+import { CheckCircle2, ArrowRight, MessageCircle, Image as ImageIcon, Calculator } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { env } from '../../utils/env'
 import { whatsappLink } from '../../utils/whatsapp'
 
@@ -37,21 +38,22 @@ export default function HeroSection() {
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/orcamento"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-neutral-800"
+            >
+              <Calculator className="h-4 w-4" />
+              Calcular estimativa da minha obra
+              <ArrowRight className="h-4 w-4" />
+            </Link>
             <a
               href={whatsappLink('Olá, quero solicitar uma análise inicial para obra ou reforma. Posso enviar fotos do imóvel?')}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-neutral-800"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Solicitar orçamento pelo WhatsApp
-              <ArrowRight className="h-4 w-4" />
-            </a>
-            <a
-              href="#servicos"
               className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-100"
             >
-              Ver serviços
+              <MessageCircle className="h-4 w-4" />
+              Falar pelo WhatsApp
             </a>
           </div>
 

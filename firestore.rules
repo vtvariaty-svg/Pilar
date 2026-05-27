@@ -2,8 +2,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+
     match /leads/{leadId} {
-      // Anyone can create a lead (public form submission)
       allow create: if
         request.resource.data.keys().hasAll(['name', 'phone', 'serviceType', 'source', 'status', 'createdAt', 'updatedAt'])
         && request.resource.data.name is string
@@ -20,30 +24,61 @@ service cloud.firestore {
              'Banheiro/cozinha',
              'Acabamento',
              'Telhado',
+             'Área externa',
              'Outro'
            ];
-
-      // Only authenticated admins can read leads
-      allow read: if request.auth != null;
-
-      // Only authenticated admins can update status and internalNotes
+      allow read: if isAdmin();
       allow update: if
-        request.auth != null
+        isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'internalNotes', 'updatedAt'])
         && (
           !request.resource.data.keys().hasAny(['status'])
           || request.resource.data.status in [
-               'novo',
-               'em_atendimento',
-               'visita_agendada',
-               'proposta_enviada',
-               'fechado',
-               'perdido'
+               'novo', 'em_atendimento', 'visita_agendada',
+               'proposta_enviada', 'fechado', 'perdido'
              ]
         );
+      allow delete: if isAdmin();
+    }
 
-      // Only authenticated admins can delete
-      allow delete: if request.auth != null;
+    match /quoteEstimates/{id} {
+      allow create: if
+        request.resource.data.keys().hasAll(['client', 'serviceType', 'inputs', 'calculation', 'status', 'source', 'createdAt', 'updatedAt'])
+        && request.resource.data.status == 'estimativa_criada'
+        && request.resource.data.source == 'calculator';
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /appointments/{id} {
+      allow create: if
+        request.resource.data.keys().hasAll(['clientName', 'phone', 'serviceType', 'date', 'startTime', 'status', 'createdAt', 'updatedAt'])
+        && request.resource.data.status == 'solicitado';
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /pricingSettings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /serviceCatalog/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /platformSettings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /adminUsers/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if isAdmin();
+    }
+
+    match /portfolio/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }

@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { HardHat, LayoutDashboard, Image, LogOut } from 'lucide-react'
+import { HardHat, LayoutDashboard, Image, LogOut, Users, Calculator, Calendar, Settings, Layers, SlidersHorizontal } from 'lucide-react'
 import { logout } from '../../services/authService'
 import { env } from '../../utils/env'
 
@@ -9,8 +9,14 @@ interface AdminLayoutProps {
 }
 
 const navItems = [
-  { to: '/admin', label: 'Leads', icon: LayoutDashboard },
+  { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/pedidos', label: 'Pedidos', icon: Users },
+  { to: '/admin/orcamentos', label: 'Estimativas', icon: Calculator },
+  { to: '/admin/agendamentos', label: 'Agendamentos', icon: Calendar },
+  { to: '/admin/parametros', label: 'Parâmetros', icon: SlidersHorizontal },
+  { to: '/admin/servicos', label: 'Serviços', icon: Layers },
   { to: '/admin/portfolio', label: 'Portfólio', icon: Image },
+  { to: '/admin/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
@@ -20,6 +26,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   async function handleLogout() {
     await logout()
     navigate('/admin/login')
+  }
+
+  function isActive(to: string) {
+    return location.pathname === to
   }
 
   return (
@@ -41,7 +51,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               key={to}
               to={to}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-                location.pathname === to
+                isActive(to)
                   ? 'bg-neutral-950 text-white'
                   : 'text-neutral-700 hover:bg-neutral-100'
               }`}
@@ -72,13 +82,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <p className="text-sm font-bold">{env.companyName} · Admin</p>
           </div>
 
-          <div className="flex items-center gap-2 lg:ml-auto">
+          <div className="flex items-center gap-1.5 overflow-x-auto lg:hidden">
             {navItems.map(({ to, label }) => (
               <Link
                 key={to}
                 to={to}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition lg:hidden ${
-                  location.pathname === to ? 'bg-neutral-950 text-white' : 'text-neutral-700 hover:bg-neutral-100'
+                className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                  isActive(to) ? 'bg-neutral-950 text-white' : 'text-neutral-700 hover:bg-neutral-100'
                 }`}
               >
                 {label}
@@ -86,7 +96,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             ))}
             <button
               onClick={handleLogout}
-              className="rounded-lg p-1.5 text-neutral-600 hover:bg-neutral-100 lg:hidden"
+              className="rounded-lg p-1.5 text-neutral-600 hover:bg-neutral-100"
             >
               <LogOut className="h-4 w-4" />
             </button>

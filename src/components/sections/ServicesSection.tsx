@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Calculator, ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { services } from '../../data/services'
 
 export default function ServicesSection() {
@@ -33,6 +34,16 @@ export default function ServicesSection() {
             </motion.div>
           )
         })}
+      </div>
+      <div className="mt-10 flex items-center justify-center">
+        <Link
+          to="/orcamento"
+          className="inline-flex items-center gap-2 rounded-2xl bg-neutral-950 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-neutral-800"
+        >
+          <Calculator className="h-4 w-4" />
+          Calcular estimativa da minha obra
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
     </section>
   )
