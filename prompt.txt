@@ -1,224 +1,90 @@
-Você é um engenheiro full-stack sênior especializado em React, TypeScript, Firebase Auth, Firestore e Firebase Security Rules.
+Audite e corrija a fase atual do projeto antes de evoluir.
 
 Projeto:
 git@github.com:vtvariaty-svg/Pilar.git
 
-Objetivo:
-Corrigir a separação entre usuário administrador e usuário comum/cliente.
+Prioridade máxima:
+Corrigir autenticação, autorização e separação entre super_admin, admin e cliente.
 
-Regra de negócio obrigatória:
-- O e-mail vtvariaty@gmail.com é o único super_admin inicial da plataforma.
-- Apenas o super_admin pode criar/promover outros usuários admin.
-- Usuários comuns/clientes não podem acessar nenhuma rota /admin.
-- Usuários comuns/clientes só poderão acessar futuramente a área /cliente.
-- Usuário autenticado não significa admin.
-- Admin precisa existir em Firestore em adminUsers/{uid} com active true.
+Regras de negócio:
+- vtvariaty@gmail.com é o super_admin inicial.
+- super_admin pode acessar /platform e /admin.
+- super_admin pode criar/promover/desativar admins.
+- admin pode acessar /admin.
+- cliente pode acessar /cliente.
+- cliente não pode acessar /admin nem /platform.
+- usuário comum não pode criar users/{uid} com globalRole platform_admin.
+- A fonte principal de permissão administrativa deve ser adminUsers/{uid}.
 
-Auditoria já identificou:
-1. ProtectedRoute atual só verifica se existe usuário autenticado.
-2. AdminLogin redireciona qualquer usuário autenticado para /admin.
-3. Firestore Rules já têm adminUsers, mas o front-end não consulta adminUsers.
-4. Storage ainda permite read/write para qualquer autenticado fora de /portfolio.
-5. npm run lint existe, mas eslint não está em devDependencies.
-6. Botão de agendamento da calculadora navega para /#contato, mas a seção atual usa id="orcamento".
+Correções obrigatórias:
 
-Tarefas obrigatórias:
+1. AuthContext
+Alterar isPlatformAdmin para ser baseado em adminUsers:
+isPlatformAdmin = adminUserData?.role === 'super_admin' && adminUserData?.active === true
 
-1. Criar src/services/adminUserService.ts
+Manter isSuperAdminUser igual ou equivalente.
 
-Com:
-- getAdminUser(uid)
-- isCurrentUserAdmin()
-- createAdminUser(data)
-- listAdminUsers()
-- updateAdminUserRole()
-- deactivateAdminUser()
+Remover dependência de userProfile.globalRole para liberar /platform.
 
-Tipo:
-AdminUser {
-  uid: string
-  email: string
-  name?: string
-  role: "super_admin" | "admin"
-  active: boolean
-  createdBy?: string
-  createdAt?: Timestamp
-  updatedAt?: Timestamp
-}
+2. Firestore Rules
+Corrigir users/{uid}:
+- create só pode criar perfil com globalRole == 'user'
+- bloquear campos extras com hasOnly
+- cliente não pode criar role administrativo
+- update do próprio usuário só pode alterar name, phone e updatedAt
 
-2. Substituir ProtectedRoute admin
+Corrigir adminUsers/{uid}:
+- bootstrap só para request.auth.token.email == 'vtvariaty@gmail.com'
+- exigir email == 'vtvariaty@gmail.com'
+- exigir active == true
+- exigir role == 'super_admin'
+- bloquear campos extras com hasOnly
+- apenas super_admin pode criar outros admins
+- apenas super_admin pode atualizar/desativar admins
 
-Criar:
-src/components/admin/AdminRoute.tsx
+3. PlatformAdminRoute
+Garantir que usa isPlatformAdmin baseado em adminUsers.role == super_admin.
 
-Ele deve:
-- ouvir Firebase Auth
-- se não logado, redirecionar para /admin/login
-- se logado, consultar adminUsers/{uid}
-- se não existir ou active false, redirecionar para /entrar ou mostrar “Acesso não autorizado”
-- se existir, renderizar children
+4. CustomerRoute
+Não tratar qualquer usuário logado como cliente.
+Se usuário é admin/super_admin, redirecionar para /admin/dashboard ou /platform.
+Se usuário comum/cliente, permitir /cliente.
 
-Depois substituir ProtectedRoute por AdminRoute em todas as páginas admin.
+5. AdminLeadsPage
+Corrigir encoding:
+- trocar “Â·” por “·”
+- trocar “solicitaÃ§Ãµes” por “solicitações”
+- salvar arquivo em UTF-8 sem BOM.
 
-3. Corrigir AdminLogin
+6. LeadDetails
+Não fechar o painel ao salvar status ou observação.
+Atualizar estado local ou manter drawer aberto.
 
-AdminLogin deve:
-- após login, consultar adminUsers/{uid}
-- se for admin ativo, navegar para /admin/dashboard
-- se não for admin, fazer logout ou redirecionar para /entrar com mensagem de acesso negado
-- no useEffect, não redirecionar qualquer usuário logado para /admin sem checar adminUsers
-
-4. Criar bootstrap do super admin
-
-Criar uma tela ou utilitário simples:
-src/pages/admin/AdminBootstrap.tsx
-rota: /admin/bootstrap
-
-Essa tela deve:
-- funcionar apenas para usuário logado com email vtvariaty@gmail.com
-- criar adminUsers/{uid} com:
-  email: vtvariaty@gmail.com
-  role: super_admin
-  active: true
-  createdAt
-  updatedAt
-- se o documento já existir, mostrar que o super admin já está configurado
-
-Adicionar rota:
- /admin/bootstrap
-
-5. Criar gestão de admins
-
-Criar:
-src/pages/admin/AdminUsersPage.tsx
-rota:
- /admin/usuarios
-
-Essa página deve:
-- ser acessível apenas por super_admin
-- listar adminUsers
-- permitir cadastrar/promover admin por uid/email, se possível
-- permitir desativar admin
-- não permitir desativar o próprio super_admin vtvariaty@gmail.com
-
-Como ainda não há Cloud Functions:
-- não tentar criar usuário Firebase Auth diretamente pelo client se isso causar troca de sessão.
-- preferir modelo de convite:
-  adminInvites/{inviteId}
-  {
-    email,
-    role: "admin",
-    status: "pending",
-    createdBy,
-    createdAt
-  }
-
-6. Criar área de cliente mínima
-
-Criar rotas:
- /entrar
- /criar-conta
- /cliente
-
-Criar authService com:
-- signUpClient(name, email, phone, password)
-- login
-- logout
-
-Ao criar cliente:
-- criar Firebase Auth
-- criar users/{uid} com role "client"
-- NÃO criar adminUsers
-- redirecionar para /cliente
-
-Cliente:
-- deve ver uma tela simples com:
-  “Minhas solicitações”
-  “Meus orçamentos”
-  “Meus agendamentos”
-  botão “Nova estimativa”
-  botão WhatsApp
-
-Não precisa estar completo ainda, mas precisa separar cliente de admin.
-
-7. Corrigir Firestore Rules
-
-Atualizar rules com:
-- signedIn()
-- isBootstrapSuperAdmin()
-- isAdmin()
-- isSuperAdmin()
-
-Regras:
-- adminUsers:
-  - super_admin lê todos
-  - usuário lê próprio adminUser
-  - bootstrap permite vtvariaty@gmail.com criar o próprio super_admin
-  - apenas super_admin cria/atualiza/desativa admins
-
-- users:
-  - usuário cria/lê próprio perfil
-  - admin lê usuários
-  - super_admin gerencia usuários
-
-- leads, quoteEstimates, appointments:
-  - create público controlado
-  - read/update/delete apenas admin
-  - futuramente cliente poderá ler documentos vinculados a customerUid
-
-- pricingSettings, serviceCatalog, platformSettings:
-  - read público quando necessário
-  - write apenas admin
-
-8. Corrigir Storage Rules
-
-Remover fallback:
-allow read, write: if request.auth != null
-
-Substituir por:
-- /portfolio público para leitura e admin para escrita
-- /users/{uid}/... leitura/escrita apenas do próprio usuário ou admin
-- /admin/... apenas admin
-- bloquear tudo que não estiver previsto
-
-9. Corrigir calculadora
-
-No QuoteCalculator:
-- se createQuoteEstimate falhar, não fingir que está tudo salvo
-- mostrar aviso: “estimativa calculada, mas não foi possível salvar”
-- oferecer WhatsApp como fallback
-
-Corrigir handleScheduleVisit:
-- não navegar para /#contato
-- criar rota /agendar ou navegar para /#orcamento
-- se não for implementar /agendar agora, usar /#orcamento corretamente
-
-10. Corrigir lint
-
-O package.json tem script lint, mas eslint não está instalado.
-Escolher uma opção:
-- instalar eslint e configurar corretamente para React + TypeScript
+7. Agendamento
+Decidir uma implementação mínima:
+- criar rota /agendar
 ou
-- remover script lint até configurar
+- no resultado da calculadora, ao clicar em “Agendar visita”, criar appointment vinculado à quoteEstimate.
+Se o usuário estiver logado, salvar customerUid.
+Se não estiver logado, permitir pré-agendamento público ou redirecionar para criar conta.
 
-Preferência: instalar e configurar ESLint.
+8. Build e lint
+Rodar:
+npm install
+npm run build
+npm run lint
 
-11. Build
+Corrigir qualquer erro TypeScript ou ESLint.
 
-Depois de implementar:
-- npm install
-- npm run build
-- npm run lint
-- corrigir erros
-- não fazer deploy se Firebase CLI não estiver autenticado
+9. Deploy
+Após corrigir:
+firebase deploy --only firestore:rules,storage,hosting
 
-Critérios de aceite:
-- vtvariaty@gmail.com consegue virar super_admin via /admin/bootstrap.
-- Usuário comum logado não acessa /admin.
-- Admin ativo acessa /admin/dashboard.
-- AdminLogin não deixa cliente entrar no painel.
-- Cliente consegue criar conta e entrar em /cliente.
-- Firestore Rules bloqueiam leitura admin para cliente.
-- Storage não permite escrita ampla para qualquer autenticado.
-- npm run build passa.
-- npm run lint passa ou script é ajustado.
+Não prosseguir para novas features se build ou rules estiverem quebrados.
+
+Depois dessas correções, evoluir para:
+- timeline única do pedido no admin
+- timeline do pedido no cliente
+- vínculo quoteEstimate -> appointment -> lead
+- botão “converter estimativa em pedido”
+- status visível ao cliente

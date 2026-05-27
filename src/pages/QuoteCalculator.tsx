@@ -43,6 +43,7 @@ export default function QuoteCalculator() {
   const [calculation, setCalculation] = useState<QuoteCalculation | null>(null)
   const [loading, setLoading] = useState(false)
   const [saveWarning, setSaveWarning] = useState(false)
+  const [quoteId, setQuoteId] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -56,7 +57,8 @@ export default function QuoteCalculator() {
       const calc = calculateQuoteEstimate(inputs, serviceType, settings)
       setCalculation(calc)
       try {
-        await createQuoteEstimate({ client, serviceType, inputs, calculation: calc })
+        const id = await createQuoteEstimate({ client, serviceType, inputs, calculation: calc })
+        setQuoteId(id)
       } catch {
         setSaveWarning(true)
       }
@@ -81,11 +83,16 @@ export default function QuoteCalculator() {
   }
 
   function handleScheduleVisit() {
-    navigate('/')
-    setTimeout(() => {
-      const el = document.getElementById('orcamento')
-      if (el) el.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
+    navigate('/agendar', {
+      state: {
+        clientName: client.name,
+        phone: client.phone,
+        city: client.city,
+        neighborhood: client.neighborhood,
+        serviceType,
+        quoteEstimateId: quoteId,
+      },
+    })
   }
 
   return (

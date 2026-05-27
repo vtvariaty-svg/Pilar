@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth)
   }
 
-  const isPlatformAdmin = userProfile?.globalRole === 'platform_admin'
+  const isPlatformAdmin = adminUserData?.role === 'super_admin' && adminUserData?.active === true
   const role = tenantMember?.role ?? null
   const isTenantOwner = role === 'owner'
   const isTenantAdmin = role === 'admin' || isTenantOwner

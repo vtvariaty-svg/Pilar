@@ -48,7 +48,7 @@ export default function AdminLeadsPage() {
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Pedidos</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            {leads.length} pedidos no total Â· {newCount} novos
+            {leads.length} pedidos no total · {newCount} novos
           </p>
         </div>
 
@@ -80,7 +80,7 @@ export default function AdminLeadsPage() {
           <div className="flex flex-col items-center justify-center rounded-3xl border border-neutral-200 bg-white py-16 text-center">
             <Users className="h-10 w-10 text-neutral-300" />
             <p className="mt-3 font-semibold text-neutral-500">Nenhum pedido encontrado</p>
-            <p className="mt-1 text-xs text-neutral-400">Tente outros filtros ou aguarde novas solicitaÃ§Ãµes.</p>
+            <p className="mt-1 text-xs text-neutral-400">Tente outros filtros ou aguarde novas solicitações.</p>
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -99,9 +99,8 @@ export default function AdminLeadsPage() {
 
         {selected && (
           <LeadDetails
-            lead={selected}
+            lead={leads.find((l) => l.id === selected.id) ?? selected}
             onClose={() => setSelected(null)}
-            onUpdated={() => setSelected(null)}
           />
         )}
       </AdminLayout>

@@ -3,6 +3,7 @@ import Home from '../pages/Home'
 import QuoteCalculator from '../pages/QuoteCalculator'
 import SignIn from '../pages/SignIn'
 import SignUp from '../pages/SignUp'
+import ScheduleVisit from '../pages/ScheduleVisit'
 import AdminLogin from '../pages/AdminLogin'
 import AdminPortfolio from '../pages/AdminPortfolio'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
@@ -35,6 +36,7 @@ export default function AppRoutes() {
         <Route path="/orcamento" element={<QuoteCalculator />} />
         <Route path="/entrar" element={<SignIn />} />
         <Route path="/criar-conta" element={<SignUp />} />
+        <Route path="/agendar" element={<ScheduleVisit />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/bootstrap" element={<AdminBootstrap />} />
 
