@@ -13,6 +13,7 @@ import { createCustomer } from '../services/customerService'
 import { setTenantMember } from '../services/membershipService'
 import type { UserProfile } from '../types/UserProfile'
 import type { TenantMember } from '../types/TenantMember'
+import type { AdminUser } from '../types/AdminUser'
 
 const DEFAULT_TENANT = 'pilar'
 
@@ -28,6 +29,9 @@ interface AuthContextValue {
   isTenantOperator: boolean
   isTenantStaff: boolean
   isCustomer: boolean
+  adminUserData: AdminUser | null
+  isAdminUser: boolean
+  isSuperAdminUser: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (
     email: string,
@@ -49,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null | undefined>(undefined)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [tenantMember, setTenantMemberState] = useState<TenantMember | null>(null)
+  const [adminUserData, setAdminUserData] = useState<AdminUser | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -57,24 +62,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!u) {
         setUserProfile(null)
         setTenantMemberState(null)
+        setAdminUserData(null)
         setLoading(false)
         return
       }
 
-      const profileSnap = await getDoc(doc(db, 'users', u.uid))
+      const [profileSnap, memberSnap, adminSnap] = await Promise.all([
+        getDoc(doc(db, 'users', u.uid)),
+        getDoc(doc(db, `tenants/${DEFAULT_TENANT}/members`, u.uid)),
+        getDoc(doc(db, 'adminUsers', u.uid)),
+      ])
+
       setUserProfile(profileSnap.exists() ? ({ uid: u.uid, ...profileSnap.data() } as UserProfile) : null)
 
-      const memberSnap = await getDoc(doc(db, `tenants/${DEFAULT_TENANT}/members`, u.uid))
       if (memberSnap.exists()) {
         setTenantMemberState({ uid: u.uid, ...memberSnap.data() } as TenantMember)
+      } else if (adminSnap.exists()) {
+        setTenantMemberState({ uid: u.uid, tenantId: DEFAULT_TENANT, role: 'admin', createdAt: null as never, updatedAt: null as never })
       } else {
-        const legacySnap = await getDoc(doc(db, 'adminUsers', u.uid))
-        setTenantMemberState(
-          legacySnap.exists()
-            ? ({ uid: u.uid, tenantId: DEFAULT_TENANT, role: 'admin', createdAt: null as never, updatedAt: null as never })
-            : null,
-        )
+        setTenantMemberState(null)
       }
+
+      setAdminUserData(adminSnap.exists() ? ({ uid: u.uid, ...adminSnap.data() } as AdminUser) : null)
 
       setLoading(false)
     })
@@ -108,6 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isTenantOperator = role === 'operator' || isTenantAdmin
   const isTenantStaff = isTenantOperator || isPlatformAdmin
   const isCustomer = role === 'customer'
+  const isAdminUser = (adminUserData?.active === true) || isTenantStaff
+  const isSuperAdminUser = adminUserData?.role === 'super_admin' && adminUserData?.active === true
 
   if (user === undefined) {
     return (
@@ -131,6 +142,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isTenantOperator,
         isTenantStaff,
         isCustomer,
+        adminUserData,
+        isAdminUser,
+        isSuperAdminUser,
         signIn,
         signUp,
         logout,

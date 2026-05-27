@@ -13,6 +13,8 @@ import AdminPricingPage from '../pages/admin/AdminPricingPage'
 import AdminServicesPage from '../pages/admin/AdminServicesPage'
 import AdminSettingsPage from '../pages/admin/AdminSettingsPage'
 import AdminCustomersPage from '../pages/admin/AdminCustomersPage'
+import AdminBootstrap from '../pages/admin/AdminBootstrap'
+import AdminUsersPage from '../pages/admin/AdminUsersPage'
 import ClientDashboard from '../pages/client/ClientDashboard'
 import ClientLeadsPage from '../pages/client/ClientLeadsPage'
 import ClientQuotesPage from '../pages/client/ClientQuotesPage'
@@ -34,6 +36,7 @@ export default function AppRoutes() {
         <Route path="/entrar" element={<SignIn />} />
         <Route path="/criar-conta" element={<SignUp />} />
         <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/bootstrap" element={<AdminBootstrap />} />
 
         {/* Admin */}
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
@@ -46,6 +49,7 @@ export default function AppRoutes() {
         <Route path="/admin/servicos" element={<AdminServicesPage />} />
         <Route path="/admin/portfolio" element={<AdminPortfolio />} />
         <Route path="/admin/configuracoes" element={<AdminSettingsPage />} />
+        <Route path="/admin/usuarios" element={<AdminUsersPage />} />
 
         {/* Client */}
         <Route path="/cliente" element={<ClientDashboard />} />

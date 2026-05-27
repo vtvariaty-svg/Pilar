@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Users, Calculator, Calendar, TrendingUp, CheckCircle2, XCircle, Clock } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import TenantAdminRoute from '../../components/route/TenantAdminRoute'
+import AdminRoute from '../../components/admin/AdminRoute'
 import { subscribeLeads } from '../../services/leadsService'
 import { subscribeQuoteEstimates } from '../../services/quoteEstimateService'
 import { subscribeAppointments } from '../../services/appointmentService'
@@ -60,24 +60,24 @@ export default function AdminDashboardPage() {
   const pendingAppointments = appointments.filter((a) => a.status === 'solicitado' || a.status === 'confirmado').length
 
   return (
-    <TenantAdminRoute>
+    <AdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Dashboard</h1>
-          <p className="mt-1 text-sm text-neutral-500">Visão geral da plataforma</p>
+          <p className="mt-1 text-sm text-neutral-500">VisÃ£o geral da plataforma</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard icon={Users} label="Total de leads" value={leads.length} sub={`${newLeads} novos`} />
           <StatCard icon={Calculator} label="Estimativas" value={quotes.length} sub="via calculadora" />
           <StatCard icon={Calendar} label="Visitas pendentes" value={pendingAppointments} sub="agendadas" />
-          <StatCard icon={TrendingUp} label="Conversão" value={`${conversionRate}%`} sub={`${closedLeads} fechados`} />
+          <StatCard icon={TrendingUp} label="ConversÃ£o" value={`${conversionRate}%`} sub={`${closedLeads} fechados`} />
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <StatCard icon={CheckCircle2} label="Propostas enviadas" value={leads.filter((l) => l.status === 'proposta_enviada').length} color="text-orange-600" />
           <StatCard icon={XCircle} label="Perdidos" value={lostLeads} color="text-red-600" />
-          <StatCard icon={Clock} label="Ticket médio estimado" value={avgTicket > 0 ? formatCurrency(avgTicket) : '—'} sub={`${closedQuotes.length} fechados`} />
+          <StatCard icon={Clock} label="Ticket mÃ©dio estimado" value={avgTicket > 0 ? formatCurrency(avgTicket) : 'â€”'} sub={`${closedQuotes.length} fechados`} />
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -92,7 +92,7 @@ export default function AdminDashboardPage() {
                   <li key={l.id} className="flex items-center justify-between rounded-xl bg-neutral-50 px-3 py-2">
                     <div>
                       <p className="text-sm font-semibold text-neutral-800">{l.name}</p>
-                      <p className="text-xs text-neutral-500">{l.serviceType} · {l.city}</p>
+                      <p className="text-xs text-neutral-500">{l.serviceType} Â· {l.city}</p>
                     </div>
                     <span className="rounded-full bg-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-600">{l.status}</span>
                   </li>
@@ -112,7 +112,7 @@ export default function AdminDashboardPage() {
                   <li key={q.id} className="flex items-center justify-between rounded-xl bg-neutral-50 px-3 py-2">
                     <div>
                       <p className="text-sm font-semibold text-neutral-800">{q.client.name}</p>
-                      <p className="text-xs text-neutral-500">{q.serviceType} · {q.client.city}</p>
+                      <p className="text-xs text-neutral-500">{q.serviceType} Â· {q.client.city}</p>
                     </div>
                     <span className="text-sm font-bold text-neutral-950">{formatCurrency(q.calculation.estimatedMid)}</span>
                   </li>
@@ -122,6 +122,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </AdminLayout>
-    </TenantAdminRoute>
+    </AdminRoute>
   )
 }
+

@@ -6,6 +6,21 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isBootstrapSuperAdmin() {
+      return signedIn() && request.auth.token.email == 'vtvariaty@gmail.com';
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid))
+        && get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.active == true;
+    }
+
+    function isSuperAdmin() {
+      return isAdmin()
+        && get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.role == 'super_admin';
+    }
+
     function isPlatformAdmin() {
       return signedIn()
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.globalRole == 'platform_admin';
@@ -23,28 +38,38 @@ service cloud.firestore {
     function isTenantStaff(tenantId) {
       return isPlatformAdmin()
         || (isTenantMember(tenantId) && tenantRole(tenantId) in ['owner', 'admin', 'operator'])
-        || (signedIn() && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)));
+        || isAdmin();
     }
 
     // ── Global collections ─────────────────────────────────────────────
 
     match /users/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || isPlatformAdmin());
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin() || isPlatformAdmin());
       allow create: if signedIn() && request.auth.uid == uid;
       allow update: if signedIn() && request.auth.uid == uid
         && request.resource.data.diff(resource.data).affectedKeys()
              .hasOnly(['name', 'phone', 'updatedAt']);
-      allow delete: if isPlatformAdmin();
+      allow delete: if isSuperAdmin() || isPlatformAdmin();
+    }
+
+    match /adminUsers/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isSuperAdmin());
+      allow create: if
+        (isBootstrapSuperAdmin() && request.auth.uid == uid && request.resource.data.role == 'super_admin')
+        || (isSuperAdmin() && request.resource.data.role in ['admin', 'super_admin']);
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    match /adminInvites/{inviteId} {
+      allow read: if isSuperAdmin();
+      allow create: if isSuperAdmin();
+      allow update, delete: if isSuperAdmin();
     }
 
     match /tenants/{tenantId} {
       allow read: if true;
-      allow write: if isPlatformAdmin();
-    }
-
-    match /adminUsers/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || isPlatformAdmin());
-      allow write: if isPlatformAdmin();
+      allow write: if isPlatformAdmin() || isSuperAdmin();
     }
 
     // ── Tenant subcollections ──────────────────────────────────────────
@@ -126,39 +151,39 @@ service cloud.firestore {
         && request.resource.data.phone is string && request.resource.data.phone.size() > 0
         && request.resource.data.source == 'site'
         && request.resource.data.status == 'novo';
-      allow read: if isTenantStaff('pilar') || isPlatformAdmin();
-      allow update: if isTenantStaff('pilar') || isPlatformAdmin();
-      allow delete: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow read: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
+      allow update: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
+      allow delete: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /quoteEstimates/{id} {
-      allow read: if isTenantStaff('pilar') || isPlatformAdmin();
-      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow read: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
+      allow write: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /appointments/{id} {
-      allow read: if isTenantStaff('pilar') || isPlatformAdmin();
-      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow read: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
+      allow write: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /pricingSettings/{id} {
       allow read: if true;
-      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow write: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /serviceCatalog/{id} {
       allow read: if true;
-      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow write: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /platformSettings/{id} {
       allow read: if true;
-      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow write: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /portfolio/{id} {
       allow read: if true;
-      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow write: if isAdmin() || isTenantStaff('pilar') || isPlatformAdmin();
     }
   }
 }

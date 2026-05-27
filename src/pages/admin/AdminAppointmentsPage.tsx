@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Calendar, X } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import TenantAdminRoute from '../../components/route/TenantAdminRoute'
+import AdminRoute from '../../components/admin/AdminRoute'
 import { subscribeAppointments, updateAppointmentStatus, updateAppointmentNotes } from '../../services/appointmentService'
 import { formatDate } from '../../utils/formatDate'
 import type { Appointment, AppointmentStatus } from '../../types/Appointment'
@@ -45,11 +45,11 @@ export default function AdminAppointmentsPage() {
   const past = appointments.filter((a) => a.status === 'realizado' || a.status === 'cancelado')
 
   return (
-    <TenantAdminRoute>
+    <AdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Agendamentos</h1>
-          <p className="mt-1 text-sm text-neutral-500">{appointments.length} total · {pending.length} pendentes</p>
+          <p className="mt-1 text-sm text-neutral-500">{appointments.length} total Â· {pending.length} pendentes</p>
         </div>
 
         {loading ? (
@@ -92,7 +92,7 @@ export default function AdminAppointmentsPage() {
               <div className="mb-4 flex items-start justify-between">
                 <div>
                   <h2 className="text-lg font-black text-neutral-950">{selected.clientName}</h2>
-                  <p className="text-sm text-neutral-500">{selected.serviceType} · {selected.date} {selected.startTime}</p>
+                  <p className="text-sm text-neutral-500">{selected.serviceType} Â· {selected.date} {selected.startTime}</p>
                 </div>
                 <button onClick={() => setSelected(null)} className="rounded-xl p-2 hover:bg-neutral-100">
                   <X className="h-4 w-4" />
@@ -103,13 +103,13 @@ export default function AdminAppointmentsPage() {
                 <div><span className="font-medium">Telefone:</span> {selected.phone}</div>
                 <div><span className="font-medium">Cidade:</span> {selected.city}</div>
                 {selected.neighborhood && <div><span className="font-medium">Bairro:</span> {selected.neighborhood}</div>}
-                {selected.address && <div className="col-span-2"><span className="font-medium">Endereço:</span> {selected.address}</div>}
+                {selected.address && <div className="col-span-2"><span className="font-medium">EndereÃ§o:</span> {selected.address}</div>}
                 <div><span className="font-medium">Criado em:</span> {formatDate(selected.createdAt)}</div>
               </div>
 
               {selected.notes && (
                 <div className="mb-4 rounded-xl bg-neutral-50 p-3 text-sm text-neutral-700">
-                  <p className="mb-1 text-xs font-semibold text-neutral-400">Observações do cliente</p>
+                  <p className="mb-1 text-xs font-semibold text-neutral-400">ObservaÃ§Ãµes do cliente</p>
                   {selected.notes}
                 </div>
               )}
@@ -134,7 +134,7 @@ export default function AdminAppointmentsPage() {
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   className="w-full resize-none rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none focus:border-neutral-950"
-                  placeholder="Anotações internas sobre esta visita..."
+                  placeholder="AnotaÃ§Ãµes internas sobre esta visita..."
                 />
                 <button
                   onClick={handleSaveNotes}
@@ -148,7 +148,7 @@ export default function AdminAppointmentsPage() {
           </div>
         )}
       </AdminLayout>
-    </TenantAdminRoute>
+    </AdminRoute>
   )
 }
 
@@ -165,7 +165,7 @@ function AppointmentRow({ appointment: a, onClick }: { appointment: Appointment;
             {APPOINTMENT_STATUS_LABELS[a.status]}
           </span>
         </div>
-        <p className="mt-0.5 text-sm text-neutral-500">{a.serviceType} · {a.city}</p>
+        <p className="mt-0.5 text-sm text-neutral-500">{a.serviceType} Â· {a.city}</p>
       </div>
       <div className="text-right">
         <p className="font-medium text-neutral-950">{a.date}</p>
@@ -174,3 +174,4 @@ function AppointmentRow({ appointment: a, onClick }: { appointment: Appointment;
     </button>
   )
 }
+

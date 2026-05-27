@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { HardHat, LayoutDashboard, Image, LogOut, Users, Calculator, Calendar, Settings, Layers, SlidersHorizontal } from 'lucide-react'
+import { HardHat, LayoutDashboard, Image, LogOut, Users, Calculator, Calendar, Settings, Layers, SlidersHorizontal, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { env } from '../../utils/env'
 
@@ -8,7 +8,7 @@ interface AdminLayoutProps {
   children: ReactNode
 }
 
-const navItems = [
+const baseNavItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/pedidos', label: 'Pedidos', icon: Users },
   { to: '/admin/orcamentos', label: 'Estimativas', icon: Calculator },
@@ -20,8 +20,13 @@ const navItems = [
   { to: '/admin/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
+const superAdminNavItems = [
+  { to: '/admin/usuarios', label: 'Usuários Admin', icon: ShieldCheck },
+]
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const { logout } = useAuth()
+  const { logout, isSuperAdminUser } = useAuth()
+  const navItems = isSuperAdminUser ? [...baseNavItems, ...superAdminNavItems] : baseNavItems
   const navigate = useNavigate()
   const location = useLocation()
 

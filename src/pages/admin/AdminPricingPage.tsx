@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Settings, ChevronDown, ChevronUp, Save } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import TenantAdminRoute from '../../components/route/TenantAdminRoute'
+import AdminRoute from '../../components/admin/AdminRoute'
 import { subscribePricingSettings, savePricingSettings } from '../../services/pricingSettingsService'
 import { formatCurrency } from '../../services/quoteCalculator'
 import type { PricingSettings } from '../../types/PricingSettings'
@@ -39,11 +39,11 @@ export default function AdminPricingPage() {
   }
 
   return (
-    <TenantAdminRoute>
+    <AdminRoute>
       <AdminLayout>
         <div className="mb-6">
-          <h1 className="text-xl font-black text-neutral-950">Parâmetros de precificação</h1>
-          <p className="mt-1 text-sm text-neutral-500">Configure os valores base de cada tipo de serviço</p>
+          <h1 className="text-xl font-black text-neutral-950">ParÃ¢metros de precificaÃ§Ã£o</h1>
+          <p className="mt-1 text-sm text-neutral-500">Configure os valores base de cada tipo de serviÃ§o</p>
         </div>
 
         {loading ? (
@@ -68,10 +68,10 @@ export default function AdminPricingPage() {
                       <div>
                         <p className="font-semibold text-neutral-950">{s.serviceType}</p>
                         <p className="text-xs text-neutral-500">
-                          {formatCurrency(s.basePricePerM2)}/m² · mín. {formatCurrency(s.minimumPrice)}
+                          {formatCurrency(s.basePricePerM2)}/mÂ² Â· mÃ­n. {formatCurrency(s.minimumPrice)}
                         </p>
                       </div>
-                      {isDirty && <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">Não salvo</span>}
+                      {isDirty && <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">NÃ£o salvo</span>}
                     </div>
                     {isExpanded ? <ChevronUp className="h-4 w-4 text-neutral-400" /> : <ChevronDown className="h-4 w-4 text-neutral-400" />}
                   </button>
@@ -80,12 +80,12 @@ export default function AdminPricingPage() {
                     <div className="border-t border-neutral-100 px-5 py-4">
                       <div className="grid gap-4 sm:grid-cols-2">
                         <NumberField
-                          label="Preço base por m² (R$)"
+                          label="PreÃ§o base por mÂ² (R$)"
                           value={current.basePricePerM2}
                           onChange={(v) => patch(s.id, { basePricePerM2: v })}
                         />
                         <NumberField
-                          label="Preço mínimo (R$)"
+                          label="PreÃ§o mÃ­nimo (R$)"
                           value={current.minimumPrice}
                           onChange={(v) => patch(s.id, { minimumPrice: v })}
                         />
@@ -99,11 +99,11 @@ export default function AdminPricingPage() {
                       <div className="mt-4">
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Multiplicadores de acabamento</p>
                         <div className="grid grid-cols-3 gap-3">
-                          <NumberField label="Econômico" value={current.finishStandardMultipliers.economico} step={0.05}
+                          <NumberField label="EconÃ´mico" value={current.finishStandardMultipliers.economico} step={0.05}
                             onChange={(v) => patch(s.id, { finishStandardMultipliers: { ...current.finishStandardMultipliers, economico: v } })} />
-                          <NumberField label="Intermediário" value={current.finishStandardMultipliers.intermediario} step={0.05}
+                          <NumberField label="IntermediÃ¡rio" value={current.finishStandardMultipliers.intermediario} step={0.05}
                             onChange={(v) => patch(s.id, { finishStandardMultipliers: { ...current.finishStandardMultipliers, intermediario: v } })} />
-                          <NumberField label="Alto padrão" value={current.finishStandardMultipliers.alto_padrao} step={0.05}
+                          <NumberField label="Alto padrÃ£o" value={current.finishStandardMultipliers.alto_padrao} step={0.05}
                             onChange={(v) => patch(s.id, { finishStandardMultipliers: { ...current.finishStandardMultipliers, alto_padrao: v } })} />
                         </div>
                       </div>
@@ -113,7 +113,7 @@ export default function AdminPricingPage() {
                         <div className="grid grid-cols-3 gap-3">
                           <NumberField label="Baixa" value={current.complexityMultipliers.baixa} step={0.05}
                             onChange={(v) => patch(s.id, { complexityMultipliers: { ...current.complexityMultipliers, baixa: v } })} />
-                          <NumberField label="Média" value={current.complexityMultipliers.media} step={0.05}
+                          <NumberField label="MÃ©dia" value={current.complexityMultipliers.media} step={0.05}
                             onChange={(v) => patch(s.id, { complexityMultipliers: { ...current.complexityMultipliers, media: v } })} />
                           <NumberField label="Alta" value={current.complexityMultipliers.alta} step={0.05}
                             onChange={(v) => patch(s.id, { complexityMultipliers: { ...current.complexityMultipliers, alta: v } })} />
@@ -123,15 +123,15 @@ export default function AdminPricingPage() {
                       <div className="mt-4">
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Adicionais</p>
                         <div className="grid gap-3 sm:grid-cols-2">
-                          <NumberField label="Demolição (R$)" value={current.additions.demolition}
+                          <NumberField label="DemoliÃ§Ã£o (R$)" value={current.additions.demolition}
                             onChange={(v) => patch(s.id, { additions: { ...current.additions, demolition: v } })} />
-                          <NumberField label="Elétrica (R$)" value={current.additions.electrical}
+                          <NumberField label="ElÃ©trica (R$)" value={current.additions.electrical}
                             onChange={(v) => patch(s.id, { additions: { ...current.additions, electrical: v } })} />
-                          <NumberField label="Hidráulica (R$)" value={current.additions.plumbing}
+                          <NumberField label="HidrÃ¡ulica (R$)" value={current.additions.plumbing}
                             onChange={(v) => patch(s.id, { additions: { ...current.additions, plumbing: v } })} />
-                          <NumberField label="Pintura (R$/m²)" value={current.additions.paintingPerM2}
+                          <NumberField label="Pintura (R$/mÂ²)" value={current.additions.paintingPerM2}
                             onChange={(v) => patch(s.id, { additions: { ...current.additions, paintingPerM2: v } })} />
-                          <NumberField label="Piso/revestimento (R$/m²)" value={current.additions.flooringPerM2}
+                          <NumberField label="Piso/revestimento (R$/mÂ²)" value={current.additions.flooringPerM2}
                             onChange={(v) => patch(s.id, { additions: { ...current.additions, flooringPerM2: v } })} />
                         </div>
                       </div>
@@ -142,7 +142,7 @@ export default function AdminPricingPage() {
                         className="mt-5 flex items-center gap-2 rounded-xl bg-neutral-950 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-neutral-800 disabled:opacity-40"
                       >
                         <Save className="h-4 w-4" />
-                        {saving === s.id ? 'Salvando...' : 'Salvar alterações'}
+                        {saving === s.id ? 'Salvando...' : 'Salvar alteraÃ§Ãµes'}
                       </button>
                     </div>
                   )}
@@ -152,7 +152,7 @@ export default function AdminPricingPage() {
           </div>
         )}
       </AdminLayout>
-    </TenantAdminRoute>
+    </AdminRoute>
   )
 }
 
@@ -170,3 +170,4 @@ function NumberField({ label, value, onChange, step = 1 }: { label: string; valu
     </div>
   )
 }
+

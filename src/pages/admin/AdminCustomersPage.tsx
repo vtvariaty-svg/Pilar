@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Users } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import TenantAdminRoute from '../../components/route/TenantAdminRoute'
+import AdminRoute from '../../components/admin/AdminRoute'
 import { subscribeCustomers } from '../../services/customerService'
 import { formatDate } from '../../utils/formatDate'
 import { formatBrazilPhone } from '../../utils/phone'
@@ -28,7 +28,7 @@ export default function AdminCustomersPage() {
   )
 
   return (
-    <TenantAdminRoute>
+    <AdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Clientes</h1>
@@ -78,6 +78,7 @@ export default function AdminCustomersPage() {
           </div>
         )}
       </AdminLayout>
-    </TenantAdminRoute>
+    </AdminRoute>
   )
 }
+

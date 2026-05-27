@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { HardHat, LogIn } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
@@ -7,30 +7,30 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 
 export default function AdminLogin() {
-  const { signIn, user, isTenantStaff, isPlatformAdmin } = useAuth()
+  const { signIn, logout, user, loading, isAdminUser, isPlatformAdmin } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  if (user) {
-    if (isPlatformAdmin) { navigate('/platform', { replace: true }); return null }
-    if (isTenantStaff) { navigate('/admin/dashboard', { replace: true }); return null }
-    navigate('/cliente', { replace: true })
-    return null
-  }
+  useEffect(() => {
+    if (loading || !user) return
+    if (isPlatformAdmin) { navigate('/platform', { replace: true }); return }
+    if (isAdminUser) { navigate('/admin/dashboard', { replace: true }); return }
+    logout().then(() => setError('Sua conta não tem acesso ao painel administrativo.'))
+  }, [loading, user, isAdminUser, isPlatformAdmin, navigate, logout])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
     if (!email || !password) { setError('Preencha e-mail e senha.'); return }
-    setLoading(true)
+    setSubmitting(true)
     try {
       await signIn(email, password)
     } catch {
       setError('E-mail ou senha incorretos.')
-      setLoading(false)
+      setSubmitting(false)
     }
   }
 
@@ -55,7 +55,7 @@ export default function AdminLogin() {
 
           {error && <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>}
 
-          <Button type="submit" loading={loading} size="lg" className="mt-5 w-full">
+          <Button type="submit" loading={submitting} size="lg" className="mt-5 w-full">
             <LogIn className="h-4 w-4" />
             Entrar
           </Button>

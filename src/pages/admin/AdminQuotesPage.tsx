@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Calculator, ChevronRight, X } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import TenantAdminRoute from '../../components/route/TenantAdminRoute'
+import AdminRoute from '../../components/admin/AdminRoute'
 import { subscribeQuoteEstimates, updateQuoteStatus } from '../../services/quoteEstimateService'
 import { formatCurrency } from '../../services/quoteCalculator'
 import { formatDate } from '../../utils/formatDate'
@@ -44,7 +44,7 @@ export default function AdminQuotesPage() {
   }
 
   return (
-    <TenantAdminRoute>
+    <AdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Estimativas</h1>
@@ -56,7 +56,7 @@ export default function AdminQuotesPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nome, cidade ou serviço..."
+            placeholder="Buscar por nome, cidade ou serviÃ§o..."
             className="flex-1 rounded-xl border border-neutral-300 px-4 py-2.5 text-sm outline-none focus:border-neutral-950"
           />
           <select
@@ -95,7 +95,7 @@ export default function AdminQuotesPage() {
                       {QUOTE_STATUS_LABELS[q.status]}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-sm text-neutral-500">{q.serviceType} · {q.client.city}</p>
+                  <p className="mt-0.5 text-sm text-neutral-500">{q.serviceType} Â· {q.client.city}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
@@ -125,25 +125,25 @@ export default function AdminQuotesPage() {
 
               <div className="mb-4 grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-neutral-50 p-3">
-                  <p className="text-xs text-neutral-500">Estimativa provável</p>
+                  <p className="text-xs text-neutral-500">Estimativa provÃ¡vel</p>
                   <p className="mt-0.5 text-lg font-black">{formatCurrency(selected.calculation.estimatedMid)}</p>
                 </div>
                 <div className="rounded-xl bg-neutral-50 p-3">
                   <p className="text-xs text-neutral-500">Faixa</p>
-                  <p className="mt-0.5 text-sm font-semibold">{formatCurrency(selected.calculation.estimatedLow)} – {formatCurrency(selected.calculation.estimatedHigh)}</p>
+                  <p className="mt-0.5 text-sm font-semibold">{formatCurrency(selected.calculation.estimatedLow)} â€“ {formatCurrency(selected.calculation.estimatedHigh)}</p>
                 </div>
               </div>
 
               <div className="mb-4">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Contato</p>
                 <p className="text-sm"><span className="font-medium">Telefone:</span> {selected.client.phone}</p>
-                <p className="text-sm"><span className="font-medium">Cidade:</span> {selected.client.city}{selected.client.neighborhood ? ` · ${selected.client.neighborhood}` : ''}</p>
+                <p className="text-sm"><span className="font-medium">Cidade:</span> {selected.client.city}{selected.client.neighborhood ? ` Â· ${selected.client.neighborhood}` : ''}</p>
               </div>
 
               <div className="mb-4">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Detalhes</p>
-                {selected.inputs.areaM2 > 0 && <p className="text-sm">Área: {selected.inputs.areaM2} m²</p>}
-                <p className="text-sm">Padrão: {selected.inputs.finishStandard}</p>
+                {selected.inputs.areaM2 > 0 && <p className="text-sm">Ãrea: {selected.inputs.areaM2} mÂ²</p>}
+                <p className="text-sm">PadrÃ£o: {selected.inputs.finishStandard}</p>
                 <p className="text-sm">Complexidade: {selected.inputs.complexity}</p>
                 <p className="text-sm">Prazo: {selected.inputs.timeline}</p>
                 {selected.inputs.notes && <p className="mt-1 text-sm text-neutral-600">Obs: {selected.inputs.notes}</p>}
@@ -165,6 +165,7 @@ export default function AdminQuotesPage() {
           </div>
         )}
       </AdminLayout>
-    </TenantAdminRoute>
+    </AdminRoute>
   )
 }
+

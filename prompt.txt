@@ -1,454 +1,224 @@
-Você é um engenheiro full-stack sênior especializado em React, TypeScript, Firebase e deploy de aplicações web.
+Você é um engenheiro full-stack sênior especializado em React, TypeScript, Firebase Auth, Firestore e Firebase Security Rules.
 
-Contexto:
-Estou construindo uma plataforma digital para a empreiteira do meu pai, que trabalha com construção civil, reformas de imóveis, construção do zero, ampliações e acabamentos.
-
-Meu pai já vende bem no boca a boca e tem qualidade comprovada. O objetivo agora é levar a empresa para o digital, captar clientes por site, redes sociais e anúncios, receber pedidos de orçamento e organizar os leads.
-
-IMPORTANTE:
-Eu vou deixar na raiz do projeto um arquivo chamado landing.txt.
-
-Esse arquivo contém uma landing page em React que já foi criada como referência visual, estrutural e comercial.
-
-Use o conteúdo de landing.txt como base principal para:
-- estrutura da landing page
-- copy principal
-- seções
-- formulário
-- estilo visual
-- hierarquia comercial
-- chamadas para WhatsApp
-- serviços
-- processo de orçamento
-- FAQ
-- abordagem de confiança
-
-Não copie de forma cega se houver problemas. Refatore, organize e adapte para uma aplicação real em produção usando React, TypeScript, Vite, Tailwind CSS e Firebase.
+Projeto:
+git@github.com:vtvariaty-svg/Pilar.git
 
 Objetivo:
-Construir o projeto completo, já integrado ao Firebase, com site público, formulário de orçamento, banco de leads, área administrativa protegida e deploy pelo Firebase CLI.
+Corrigir a separação entre usuário administrador e usuário comum/cliente.
 
-Stack obrigatória:
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-- Firebase Hosting
-- Firebase Firestore
-- Firebase Storage
-- Firebase Authentication
-- Firebase Security Rules
-- Firebase CLI
+Regra de negócio obrigatória:
+- O e-mail vtvariaty@gmail.com é o único super_admin inicial da plataforma.
+- Apenas o super_admin pode criar/promover outros usuários admin.
+- Usuários comuns/clientes não podem acessar nenhuma rota /admin.
+- Usuários comuns/clientes só poderão acessar futuramente a área /cliente.
+- Usuário autenticado não significa admin.
+- Admin precisa existir em Firestore em adminUsers/{uid} com active true.
 
-Servidor e banco:
-- Usar Firebase Hosting como servidor do frontend.
-- Usar Firestore como banco de dados principal.
-- Usar Firebase Storage para imagens do portfólio.
-- Usar Firebase Authentication para proteger o painel administrativo.
-- Não usar backend Express neste MVP.
-- Não usar Supabase, MongoDB, PostgreSQL ou outro banco.
-- Não usar Next.js, a menos que seja tecnicamente indispensável. A preferência é Vite + React.
+Auditoria já identificou:
+1. ProtectedRoute atual só verifica se existe usuário autenticado.
+2. AdminLogin redireciona qualquer usuário autenticado para /admin.
+3. Firestore Rules já têm adminUsers, mas o front-end não consulta adminUsers.
+4. Storage ainda permite read/write para qualquer autenticado fora de /portfolio.
+5. npm run lint existe, mas eslint não está em devDependencies.
+6. Botão de agendamento da calculadora navega para /#contato, mas a seção atual usa id="orcamento".
 
-Tarefa principal:
-Crie uma aplicação completa com base no arquivo landing.txt e entregue o projeto pronto para rodar localmente e subir para o Firebase Hosting via Firebase CLI.
+Tarefas obrigatórias:
 
-Antes de codar:
-1. Leia o arquivo landing.txt.
-2. Entenda a estrutura da landing page.
-3. Reaproveite a lógica, copy e seções.
-4. Transforme em uma aplicação organizada, modular e pronta para produção.
-5. Se o código do landing.txt estiver em um único componente, quebre em componentes menores.
+1. Criar src/services/adminUserService.ts
 
-Nome provisório da empresa:
-Empreiteira Silva
+Com:
+- getAdminUser(uid)
+- isCurrentUserAdmin()
+- createAdminUser(data)
+- listAdminUsers()
+- updateAdminUserRole()
+- deactivateAdminUser()
 
-Variáveis editáveis:
-- Nome da empresa
-- Cidade/região atendida
-- Número de WhatsApp
-- Instagram
-- Anos de experiência
-
-Criar arquivo .env.example com:
-
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_STORAGE_BUCKET=
-VITE_FIREBASE_MESSAGING_SENDER_ID=
-VITE_FIREBASE_APP_ID=
-
-VITE_COMPANY_NAME=Empreiteira Silva
-VITE_SERVICE_REGION=Sua cidade e região
-VITE_WHATSAPP_NUMBER=5500000000000
-VITE_INSTAGRAM_URL=
-VITE_YEARS_EXPERIENCE=15+
-
-Funcionalidades do site público:
-
-1. Landing page principal
-Usar landing.txt como referência.
-
-A página deve conter:
-- Header fixo
-- Hero section
-- CTA para WhatsApp
-- Serviços
-- Seção de confiança
-- Como funciona
-- Portfólio
-- Depoimentos
-- Formulário de orçamento
-- FAQ
-- Footer
-
-2. Serviços principais
-Incluir:
-- Construção do zero
-- Reformas completas
-- Ampliações
-- Banheiros e cozinhas
-- Acabamentos
-- Telhados e áreas externas
-
-3. Formulário de orçamento
-Campos:
-- nome
-- telefone/WhatsApp
-- cidade
-- bairro
-- tipo de serviço
-- descrição do serviço
-- faixa estimada de orçamento
-- prazo desejado
-- observações
-
-Tipos de serviço:
-- Construção do zero
-- Reforma completa
-- Ampliação
-- Banheiro/cozinha
-- Acabamento
-- Telhado
-- Outro
-
-Faixas de orçamento:
-- Até R$ 5.000
-- R$ 5.000 a R$ 15.000
-- R$ 15.000 a R$ 50.000
-- R$ 50.000 a R$ 100.000
-- Acima de R$ 100.000
-- Ainda não sei
-
-Ao enviar o formulário:
-- Validar campos obrigatórios.
-- Salvar o lead no Firestore.
-- Criar createdAt com serverTimestamp.
-- Criar updatedAt com serverTimestamp.
-- Criar status inicial como "novo".
-- Criar source como "site".
-- Exibir mensagem de sucesso.
-- Gerar botão para continuar conversa no WhatsApp.
-- O WhatsApp deve abrir com mensagem pré-preenchida usando os dados enviados.
-
-Estrutura do documento no Firestore:
-
-collection: leads
-
-{
-  name: string,
-  phone: string,
-  city: string,
-  neighborhood: string,
-  serviceType: string,
-  description: string,
-  budgetRange: string,
-  desiredTimeline: string,
-  notes: string,
-  source: "site",
-  status: "novo" | "em_atendimento" | "visita_agendada" | "proposta_enviada" | "fechado" | "perdido",
-  internalNotes: string,
-  createdAt: serverTimestamp,
-  updatedAt: serverTimestamp
+Tipo:
+AdminUser {
+  uid: string
+  email: string
+  name?: string
+  role: "super_admin" | "admin"
+  active: boolean
+  createdBy?: string
+  createdAt?: Timestamp
+  updatedAt?: Timestamp
 }
 
-4. Portfólio
-Criar estrutura inicial com dados mockados em src/data/portfolio.ts.
+2. Substituir ProtectedRoute admin
 
-Cada item:
-{
-  id: string,
-  title: string,
-  category: string,
-  location: string,
-  description: string,
-  imageUrl: string,
-  status: "concluida" | "em_andamento"
-}
+Criar:
+src/components/admin/AdminRoute.tsx
 
-Também preparar a estrutura para futuramente buscar imagens do Firebase Storage.
+Ele deve:
+- ouvir Firebase Auth
+- se não logado, redirecionar para /admin/login
+- se logado, consultar adminUsers/{uid}
+- se não existir ou active false, redirecionar para /entrar ou mostrar “Acesso não autorizado”
+- se existir, renderizar children
 
-5. Depoimentos
-Criar dados mockados em src/data/testimonials.ts.
+Depois substituir ProtectedRoute por AdminRoute em todas as páginas admin.
 
-Cada depoimento:
-{
-  id: string,
-  name: string,
-  location: string,
-  rating: number,
-  text: string
-}
+3. Corrigir AdminLogin
 
-Área administrativa:
+AdminLogin deve:
+- após login, consultar adminUsers/{uid}
+- se for admin ativo, navegar para /admin/dashboard
+- se não for admin, fazer logout ou redirecionar para /entrar com mensagem de acesso negado
+- no useEffect, não redirecionar qualquer usuário logado para /admin sem checar adminUsers
 
-Criar rota:
-/admin/login
+4. Criar bootstrap do super admin
 
-Funcionalidade:
-- Login com Firebase Authentication usando email e senha.
-- Não criar cadastro público.
-- O admin será criado manualmente no Firebase Console.
+Criar uma tela ou utilitário simples:
+src/pages/admin/AdminBootstrap.tsx
+rota: /admin/bootstrap
 
-Criar rota:
-/admin
+Essa tela deve:
+- funcionar apenas para usuário logado com email vtvariaty@gmail.com
+- criar adminUsers/{uid} com:
+  email: vtvariaty@gmail.com
+  role: super_admin
+  active: true
+  createdAt
+  updatedAt
+- se o documento já existir, mostrar que o super admin já está configurado
 
-Funcionalidade:
-- Rota protegida.
-- Se não estiver logado, redirecionar para /admin/login.
-- Listar leads do Firestore em ordem de criação decrescente.
-- Filtro por status.
-- Filtro por tipo de serviço.
-- Busca por nome, telefone, cidade ou bairro.
-- Mostrar cards/tabela com:
-  - nome
-  - telefone
-  - cidade/bairro
-  - tipo de serviço
-  - faixa de orçamento
-  - status
-  - data de criação
+Adicionar rota:
+ /admin/bootstrap
 
-Detalhe do lead:
-- Ao clicar em um lead, abrir painel/modal de detalhe.
-- Mostrar todos os dados enviados.
-- Permitir alterar status.
-- Permitir adicionar/editar observação interna.
-- Botão para abrir conversa no WhatsApp com o cliente.
-- Atualizar updatedAt ao alterar status ou observação.
+5. Criar gestão de admins
 
-Criar rota:
-/admin/portfolio
+Criar:
+src/pages/admin/AdminUsersPage.tsx
+rota:
+ /admin/usuarios
 
-Funcionalidade:
-- Rota protegida.
-- Inicialmente pode exibir os itens mockados.
-- Preparar estrutura de types e componentes para futuro CRUD com Firestore + Storage.
-- Não precisa implementar CRUD completo se isso atrasar o MVP.
+Essa página deve:
+- ser acessível apenas por super_admin
+- listar adminUsers
+- permitir cadastrar/promover admin por uid/email, se possível
+- permitir desativar admin
+- não permitir desativar o próprio super_admin vtvariaty@gmail.com
 
-Arquitetura de pastas sugerida:
+Como ainda não há Cloud Functions:
+- não tentar criar usuário Firebase Auth diretamente pelo client se isso causar troca de sessão.
+- preferir modelo de convite:
+  adminInvites/{inviteId}
+  {
+    email,
+    role: "admin",
+    status: "pending",
+    createdBy,
+    createdAt
+  }
 
-src/
-  components/
-    layout/
-      Header.tsx
-      Footer.tsx
-    sections/
-      HeroSection.tsx
-      ServicesSection.tsx
-      TrustSection.tsx
-      ProcessSection.tsx
-      PortfolioSection.tsx
-      TestimonialsSection.tsx
-      FAQSection.tsx
-      ContactSection.tsx
-    forms/
-      QuoteForm.tsx
-    admin/
-      AdminLayout.tsx
-      LeadCard.tsx
-      LeadDetails.tsx
-      LeadFilters.tsx
-      ProtectedRoute.tsx
-    ui/
-      Button.tsx
-      Card.tsx
-      Input.tsx
-      Select.tsx
-      Textarea.tsx
-      Badge.tsx
-  pages/
-    Home.tsx
-    AdminLogin.tsx
-    AdminDashboard.tsx
-    AdminPortfolio.tsx
-    NotFound.tsx
-  routes/
-    AppRoutes.tsx
-  services/
-    firebase.ts
-    leadsService.ts
-    authService.ts
-  types/
-    Lead.ts
-    PortfolioItem.ts
-    Testimonial.ts
-  data/
-    portfolio.ts
-    testimonials.ts
-    services.ts
-    faq.ts
-  utils/
-    whatsapp.ts
-    formatDate.ts
-    env.ts
-  styles/
-    index.css
+6. Criar área de cliente mínima
 
-Firebase:
-Criar e configurar:
+Criar rotas:
+ /entrar
+ /criar-conta
+ /cliente
 
-firebase.json
-.firebaserc.example
-firestore.rules
-storage.rules
-firestore.indexes.json
-.env.example
+Criar authService com:
+- signUpClient(name, email, phone, password)
+- login
+- logout
 
-firebase.json:
-- Configurar hosting para publicar a pasta dist.
-- Configurar rewrite de SPA:
-  source: "**"
-  destination: "/index.html"
-- Incluir Firestore rules.
-- Incluir Storage rules.
-- Incluir indexes se necessário.
+Ao criar cliente:
+- criar Firebase Auth
+- criar users/{uid} com role "client"
+- NÃO criar adminUsers
+- redirecionar para /cliente
 
-Firestore Security Rules:
-Criar regras seguras.
+Cliente:
+- deve ver uma tela simples com:
+  “Minhas solicitações”
+  “Meus orçamentos”
+  “Meus agendamentos”
+  botão “Nova estimativa”
+  botão WhatsApp
 
-Requisitos:
-- Qualquer visitante pode criar lead na collection leads.
-- Visitante não pode ler leads.
-- Visitante não pode atualizar leads.
-- Visitante não pode deletar leads.
-- Usuário autenticado pode ler leads.
-- Usuário autenticado pode atualizar status e internalNotes.
-- Usuário autenticado pode deletar apenas se estiver autenticado.
-- Validar campos obrigatórios.
-- Validar tipos básicos.
-- Validar status permitido.
-- Validar source como "site".
-- Não deixar Firestore aberto publicamente.
+Não precisa estar completo ainda, mas precisa separar cliente de admin.
 
-Storage Rules:
-- Permitir leitura pública de imagens do portfólio.
-- Permitir upload, update e delete apenas para usuário autenticado.
-- Validar que arquivos enviados sejam imagens.
-- Validar limite de tamanho razoável, por exemplo até 5 MB.
+7. Corrigir Firestore Rules
 
-Observação importante:
-Firebase Security Rules precisam ser tratadas como parte do produto, não como detalhe. Não deixe regras abertas do tipo allow read, write: if true.
+Atualizar rules com:
+- signedIn()
+- isBootstrapSuperAdmin()
+- isAdmin()
+- isSuperAdmin()
 
-SEO:
-Implementar:
-- title
-- meta description
-- Open Graph básico
-- H1 único
-- textos com palavras-chave:
-  - empreiteira
-  - construção civil
-  - reforma de casa
-  - reforma completa
-  - construção do zero
-  - orçamento de obra
-  - reforma em [cidade]
-  - empreiteira em [cidade]
+Regras:
+- adminUsers:
+  - super_admin lê todos
+  - usuário lê próprio adminUser
+  - bootstrap permite vtvariaty@gmail.com criar o próprio super_admin
+  - apenas super_admin cria/atualiza/desativa admins
 
-Responsividade:
-- Mobile first.
-- CTA visível no mobile.
-- Botão flutuante de WhatsApp no mobile.
-- Layout limpo e confiável.
+- users:
+  - usuário cria/lê próprio perfil
+  - admin lê usuários
+  - super_admin gerencia usuários
 
-Design:
-- Visual profissional e premium.
-- Usar cores neutras.
-- Cards arredondados.
-- Sombras suaves.
-- Boa hierarquia.
-- Nada com cara de template genérico.
-- Manter a lógica visual da landing.txt, mas melhorar a estrutura se necessário.
+- leads, quoteEstimates, appointments:
+  - create público controlado
+  - read/update/delete apenas admin
+  - futuramente cliente poderá ler documentos vinculados a customerUid
 
-Qualidade:
-- TypeScript sem erros.
-- Build sem erros.
-- Componentes reutilizáveis.
-- Código legível.
-- Sem dependências desnecessárias.
-- Sem dados sensíveis hardcoded.
-- Variáveis sensíveis no .env.
+- pricingSettings, serviceCatalog, platformSettings:
+  - read público quando necessário
+  - write apenas admin
 
-Deploy obrigatório via Firebase CLI:
-Depois de implementar, configure o projeto para deploy com Firebase CLI.
+8. Corrigir Storage Rules
 
-Preciso que você:
-1. Verifique se firebase-tools está disponível.
-2. Se não estiver, me diga para instalar com:
-   npm install -g firebase-tools
-3. Prepare o projeto com os arquivos necessários do Firebase.
-4. Garanta que npm run build gera a pasta dist.
-5. Garanta que firebase.json aponta para dist.
-6. Garanta que o rewrite de SPA está configurado.
-7. Me oriente a executar:
-   firebase login
-   firebase use --add
-   firebase deploy
-8. Se possível no ambiente atual, execute o build local.
-9. Se o ambiente já estiver autenticado no Firebase CLI e tiver projeto configurado, execute o deploy.
-10. Se não puder executar o deploy por falta de autenticação, deixe tudo pronto e me diga exatamente quais comandos executar.
+Remover fallback:
+allow read, write: if request.auth != null
 
-Comandos esperados:
-npm install
-npm run dev
-npm run build
-firebase login
-firebase use --add
-firebase deploy
+Substituir por:
+- /portfolio público para leitura e admin para escrita
+- /users/{uid}/... leitura/escrita apenas do próprio usuário ou admin
+- /admin/... apenas admin
+- bloquear tudo que não estiver previsto
+
+9. Corrigir calculadora
+
+No QuoteCalculator:
+- se createQuoteEstimate falhar, não fingir que está tudo salvo
+- mostrar aviso: “estimativa calculada, mas não foi possível salvar”
+- oferecer WhatsApp como fallback
+
+Corrigir handleScheduleVisit:
+- não navegar para /#contato
+- criar rota /agendar ou navegar para /#orcamento
+- se não for implementar /agendar agora, usar /#orcamento corretamente
+
+10. Corrigir lint
+
+O package.json tem script lint, mas eslint não está instalado.
+Escolher uma opção:
+- instalar eslint e configurar corretamente para React + TypeScript
+ou
+- remover script lint até configurar
+
+Preferência: instalar e configurar ESLint.
+
+11. Build
+
+Depois de implementar:
+- npm install
+- npm run build
+- npm run lint
+- corrigir erros
+- não fazer deploy se Firebase CLI não estiver autenticado
 
 Critérios de aceite:
-- O site público funciona.
-- O formulário salva leads no Firestore.
-- O WhatsApp abre com mensagem pré-preenchida.
-- /admin/login autentica com Firebase Auth.
-- /admin lista leads reais do Firestore.
-- Admin pode alterar status do lead.
-- Admin pode adicionar observação interna.
-- Firestore não permite leitura pública dos leads.
-- Storage não permite upload público.
-- npm run build funciona.
-- Projeto está pronto para Firebase Hosting.
-- README explica configuração e deploy.
-
-README obrigatório:
-Criar README.md com:
-- descrição do projeto
-- stack
-- como configurar .env
-- como criar projeto no Firebase
-- como ativar Authentication com email/senha
-- como criar usuário admin manualmente
-- como ativar Firestore
-- como ativar Storage
-- como rodar local
-- como fazer build
-- como fazer deploy com Firebase CLI
-- como configurar domínio próprio futuramente
-- próximos passos recomendados
-
-Ao finalizar:
-- Mostre os principais arquivos criados.
-- Mostre o status do build.
-- Mostre se o deploy foi executado ou se ficou pendente por autenticação.
-- Mostre os comandos exatos que eu devo rodar no terminal.
+- vtvariaty@gmail.com consegue virar super_admin via /admin/bootstrap.
+- Usuário comum logado não acessa /admin.
+- Admin ativo acessa /admin/dashboard.
+- AdminLogin não deixa cliente entrar no painel.
+- Cliente consegue criar conta e entrar em /cliente.
+- Firestore Rules bloqueiam leitura admin para cliente.
+- Storage não permite escrita ampla para qualquer autenticado.
+- npm run build passa.
+- npm run lint passa ou script é ajustado.

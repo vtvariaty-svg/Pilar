@@ -42,6 +42,7 @@ export default function QuoteCalculator() {
   const [client, setClient] = useState<QuoteClient>(INITIAL_CLIENT)
   const [calculation, setCalculation] = useState<QuoteCalculation | null>(null)
   const [loading, setLoading] = useState(false)
+  const [saveWarning, setSaveWarning] = useState(false)
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -49,16 +50,22 @@ export default function QuoteCalculator() {
 
   async function handleSubmit() {
     setLoading(true)
+    setSaveWarning(false)
     try {
       const settings = await getPricingForService(serviceType).catch(() => getDefaultSettings(serviceType))
       const calc = calculateQuoteEstimate(inputs, serviceType, settings)
       setCalculation(calc)
-      await createQuoteEstimate({ client, serviceType, inputs, calculation: calc })
+      try {
+        await createQuoteEstimate({ client, serviceType, inputs, calculation: calc })
+      } catch {
+        setSaveWarning(true)
+      }
       setStep(3)
     } catch {
       const fallback = getDefaultSettings(serviceType)
       const calc = calculateQuoteEstimate(inputs, serviceType, fallback)
       setCalculation(calc)
+      setSaveWarning(true)
       setStep(3)
     } finally {
       setLoading(false)
@@ -74,9 +81,9 @@ export default function QuoteCalculator() {
   }
 
   function handleScheduleVisit() {
-    navigate('/#contato')
+    navigate('/')
     setTimeout(() => {
-      const el = document.getElementById('contato')
+      const el = document.getElementById('orcamento')
       if (el) el.scrollIntoView({ behavior: 'smooth' })
     }, 100)
   }
@@ -130,14 +137,30 @@ export default function QuoteCalculator() {
             />
           )}
           {step === 3 && calculation && (
-            <QuoteResult
-              serviceType={serviceType}
-              inputs={inputs}
-              client={client}
-              calculation={calculation}
-              onScheduleVisit={handleScheduleVisit}
-              onRestart={handleRestart}
-            />
+            <>
+              {saveWarning && (
+                <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  Estimativa calculada, mas não foi possível salvar. Anote os valores ou{' '}
+                  <a
+                    href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER || '5500000000000'}?text=Ol%C3%A1%2C+preciso+de+um+or%C3%A7amento`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold underline"
+                  >
+                    fale pelo WhatsApp
+                  </a>
+                  .
+                </div>
+              )}
+              <QuoteResult
+                serviceType={serviceType}
+                inputs={inputs}
+                client={client}
+                calculation={calculation}
+                onScheduleVisit={handleScheduleVisit}
+                onRestart={handleRestart}
+              />
+            </>
           )}
         </div>
       </div>

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Layers } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import TenantAdminRoute from '../../components/route/TenantAdminRoute'
+import AdminRoute from '../../components/admin/AdminRoute'
 import { subscribeServiceCatalog, toggleService } from '../../services/serviceCatalogService'
 import type { ServiceCatalog } from '../../types/ServiceCatalog'
 
@@ -25,11 +25,11 @@ export default function AdminServicesPage() {
   }
 
   return (
-    <TenantAdminRoute>
+    <AdminRoute>
       <AdminLayout>
         <div className="mb-6">
-          <h1 className="text-xl font-black text-neutral-950">Serviços</h1>
-          <p className="mt-1 text-sm text-neutral-500">Ative ou desative serviços exibidos na calculadora e no site</p>
+          <h1 className="text-xl font-black text-neutral-950">ServiÃ§os</h1>
+          <p className="mt-1 text-sm text-neutral-500">Ative ou desative serviÃ§os exibidos na calculadora e no site</p>
         </div>
 
         {loading ? (
@@ -73,6 +73,7 @@ export default function AdminServicesPage() {
           </div>
         )}
       </AdminLayout>
-    </TenantAdminRoute>
+    </AdminRoute>
   )
 }
+
