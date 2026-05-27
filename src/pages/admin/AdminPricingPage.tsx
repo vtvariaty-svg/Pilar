@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Settings, ChevronDown, ChevronUp, Save } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import ProtectedRoute from '../../components/admin/ProtectedRoute'
+import TenantAdminRoute from '../../components/route/TenantAdminRoute'
 import { subscribePricingSettings, savePricingSettings } from '../../services/pricingSettingsService'
 import { formatCurrency } from '../../services/quoteCalculator'
 import type { PricingSettings } from '../../types/PricingSettings'
@@ -39,7 +39,7 @@ export default function AdminPricingPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <TenantAdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Parâmetros de precificação</h1>
@@ -152,7 +152,7 @@ export default function AdminPricingPage() {
           </div>
         )}
       </AdminLayout>
-    </ProtectedRoute>
+    </TenantAdminRoute>
   )
 }
 

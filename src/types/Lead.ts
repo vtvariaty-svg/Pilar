@@ -19,14 +19,16 @@ export interface Lead {
   budgetRange: string
   desiredTimeline: string
   notes: string
-  source: 'site'
+  source: 'site' | 'calculator' | 'whatsapp' | 'admin'
   status: LeadStatus
   internalNotes: string
+  tenantId?: string
+  customerUid?: string
   createdAt: Timestamp
   updatedAt: Timestamp
 }
 
-export type LeadFormData = Omit<Lead, 'id' | 'source' | 'status' | 'internalNotes' | 'createdAt' | 'updatedAt'>
+export type LeadFormData = Omit<Lead, 'id' | 'source' | 'status' | 'internalNotes' | 'tenantId' | 'customerUid' | 'createdAt' | 'updatedAt'>
 
 export const STATUS_LABELS: Record<LeadStatus, string> = {
   novo: 'Novo',

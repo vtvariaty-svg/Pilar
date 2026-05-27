@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { HardHat, LayoutDashboard, Image, LogOut, Users, Calculator, Calendar, Settings, Layers, SlidersHorizontal } from 'lucide-react'
-import { logout } from '../../services/authService'
+import { useAuth } from '../../contexts/AuthContext'
 import { env } from '../../utils/env'
 
 interface AdminLayoutProps {
@@ -13,6 +13,7 @@ const navItems = [
   { to: '/admin/pedidos', label: 'Pedidos', icon: Users },
   { to: '/admin/orcamentos', label: 'Estimativas', icon: Calculator },
   { to: '/admin/agendamentos', label: 'Agendamentos', icon: Calendar },
+  { to: '/admin/clientes', label: 'Clientes', icon: Users },
   { to: '/admin/parametros', label: 'Parâmetros', icon: SlidersHorizontal },
   { to: '/admin/servicos', label: 'Serviços', icon: Layers },
   { to: '/admin/portfolio', label: 'Portfólio', icon: Image },
@@ -20,12 +21,13 @@ const navItems = [
 ]
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const { logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
   async function handleLogout() {
     await logout()
-    navigate('/admin/login')
+    navigate('/')
   }
 
   function isActive(to: string) {

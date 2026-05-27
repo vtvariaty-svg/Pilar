@@ -14,18 +14,18 @@ interface LeadDetailsProps {
   onUpdated: () => void
 }
 
-export default function LeadDetails({ lead, onClose, onUpdated }: LeadDetailsProps) {
+export default function LeadDetails({ lead, onClose }: LeadDetailsProps) {
   const [status, setStatus] = useState<LeadStatus>(lead.status)
   const [notes, setNotes] = useState(lead.internalNotes ?? '')
   const [savingStatus, setSavingStatus] = useState(false)
   const [savingNotes, setSavingNotes] = useState(false)
+  const [notesSaved, setNotesSaved] = useState(false)
 
   async function handleStatusChange(newStatus: LeadStatus) {
     setStatus(newStatus)
     setSavingStatus(true)
     try {
-      await updateLeadStatus(lead.id, newStatus)
-      onUpdated()
+      await updateLeadStatus(lead, newStatus)
     } finally {
       setSavingStatus(false)
     }
@@ -34,8 +34,9 @@ export default function LeadDetails({ lead, onClose, onUpdated }: LeadDetailsPro
   async function handleSaveNotes() {
     setSavingNotes(true)
     try {
-      await updateLeadNotes(lead.id, notes)
-      onUpdated()
+      await updateLeadNotes(lead, notes)
+      setNotesSaved(true)
+      setTimeout(() => setNotesSaved(false), 2000)
     } finally {
       setSavingNotes(false)
     }
@@ -63,7 +64,7 @@ export default function LeadDetails({ lead, onClose, onUpdated }: LeadDetailsPro
         <div className="sticky top-0 flex items-center justify-between border-b border-neutral-100 bg-white px-5 py-4">
           <div>
             <h2 className="font-bold text-neutral-950">{lead.name}</h2>
-            <p className="text-xs text-neutral-500 mt-0.5">{lead.phone} · {lead.city}</p>
+            <p className="mt-0.5 text-xs text-neutral-500">{lead.phone} · {lead.city}</p>
           </div>
           <div className="flex items-center gap-2">
             <a
@@ -100,18 +101,18 @@ export default function LeadDetails({ lead, onClose, onUpdated }: LeadDetailsPro
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-xs text-neutral-400 flex items-center gap-1">
+            <p className="mt-2 flex items-center gap-1 text-xs text-neutral-400">
               Status atual: <Badge className={STATUS_COLORS[status]}>{STATUS_LABELS[status]}</Badge>
             </p>
           </section>
 
           <section>
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-400">Dados do pedido</h3>
-            <div className="rounded-2xl border border-neutral-100 bg-neutral-50 divide-y divide-neutral-100">
+            <div className="divide-y divide-neutral-100 rounded-2xl border border-neutral-100 bg-neutral-50">
               {fields.map(({ label, value }) => (
                 <div key={label} className="flex gap-4 px-4 py-3">
                   <p className="w-40 shrink-0 text-xs font-medium text-neutral-500">{label}</p>
-                  <p className="text-sm text-neutral-900 break-words">{value}</p>
+                  <p className="break-words text-sm text-neutral-900">{value}</p>
                 </div>
               ))}
             </div>
@@ -121,20 +122,18 @@ export default function LeadDetails({ lead, onClose, onUpdated }: LeadDetailsPro
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-400">Observações internas</h3>
             <textarea
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(e) => { setNotes(e.target.value); setNotesSaved(false) }}
               rows={4}
               placeholder="Notas internas sobre este lead (não visíveis ao cliente)..."
               className="w-full resize-none rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-950"
             />
-            <Button
-              onClick={handleSaveNotes}
-              loading={savingNotes}
-              size="sm"
-              className="mt-2"
-            >
-              <Save className="h-3.5 w-3.5" />
-              Salvar observação
-            </Button>
+            <div className="mt-2 flex items-center gap-3">
+              <Button onClick={handleSaveNotes} loading={savingNotes} size="sm">
+                <Save className="h-3.5 w-3.5" />
+                Salvar observação
+              </Button>
+              {notesSaved && <span className="text-xs font-medium text-green-600">Salvo!</span>}
+            </div>
           </section>
         </div>
       </div>

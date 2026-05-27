@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Users, Calculator, Calendar, TrendingUp, CheckCircle2, XCircle, Clock } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import ProtectedRoute from '../../components/admin/ProtectedRoute'
+import TenantAdminRoute from '../../components/route/TenantAdminRoute'
 import { subscribeLeads } from '../../services/leadsService'
 import { subscribeQuoteEstimates } from '../../services/quoteEstimateService'
 import { subscribeAppointments } from '../../services/appointmentService'
@@ -60,7 +60,7 @@ export default function AdminDashboardPage() {
   const pendingAppointments = appointments.filter((a) => a.status === 'solicitado' || a.status === 'confirmado').length
 
   return (
-    <ProtectedRoute>
+    <TenantAdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Dashboard</h1>
@@ -122,6 +122,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </AdminLayout>
-    </ProtectedRoute>
+    </TenantAdminRoute>
   )
 }

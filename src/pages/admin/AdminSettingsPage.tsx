@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import ProtectedRoute from '../../components/admin/ProtectedRoute'
+import TenantAdminRoute from '../../components/route/TenantAdminRoute'
 import { getPlatformSettings, savePlatformSettings, DEFAULT_PLATFORM } from '../../services/platformSettingsService'
 import type { PlatformSettings } from '../../types/PlatformSettings'
 
@@ -35,18 +35,18 @@ export default function AdminSettingsPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
+      <TenantAdminRoute>
         <AdminLayout>
           <div className="flex items-center justify-center py-20">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-950" />
           </div>
         </AdminLayout>
-      </ProtectedRoute>
+      </TenantAdminRoute>
     )
   }
 
   return (
-    <ProtectedRoute>
+    <TenantAdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Configurações</h1>
@@ -86,7 +86,7 @@ export default function AdminSettingsPage() {
           </div>
         </form>
       </AdminLayout>
-    </ProtectedRoute>
+    </TenantAdminRoute>
   )
 }
 

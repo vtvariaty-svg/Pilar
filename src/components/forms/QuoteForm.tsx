@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { MessageCircle, CheckCircle2, ArrowRight } from 'lucide-react'
 import { createLead } from '../../services/leadsService'
 import { whatsappLinkFromLead } from '../../utils/whatsapp'
+import { useAuth } from '../../contexts/AuthContext'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import Textarea from '../ui/Textarea'
@@ -61,11 +62,22 @@ function validate(form: FormState): Errors {
 }
 
 export default function QuoteForm() {
+  const { user, userProfile } = useAuth()
   const [form, setForm] = useState<FormState>(initial)
   const [errors, setErrors] = useState<Errors>({})
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [whatsappUrl, setWhatsappUrl] = useState('')
+
+  useEffect(() => {
+    if (userProfile) {
+      setForm((prev) => ({
+        ...prev,
+        name: prev.name || userProfile.name || '',
+        phone: prev.phone || userProfile.phone || '',
+      }))
+    }
+  }, [userProfile])
 
   function set(field: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -75,13 +87,10 @@ export default function QuoteForm() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     const errs = validate(form)
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs)
-      return
-    }
+    if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setLoading(true)
     try {
-      await createLead(form)
+      await createLead(form, { customerUid: user?.uid })
       const url = whatsappLinkFromLead(form)
       setWhatsappUrl(url)
       setSubmitted(true)
@@ -125,86 +134,43 @@ export default function QuoteForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-xl sm:p-8"
-    >
+    <form onSubmit={handleSubmit} className="rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-xl sm:p-8">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Input
-          label="Nome *"
-          placeholder="Seu nome completo"
-          value={form.name}
-          onChange={(e) => set('name', e.target.value)}
-          error={errors.name}
-        />
-        <Input
-          label="Telefone / WhatsApp *"
-          placeholder="(00) 00000-0000"
-          value={form.phone}
-          onChange={(e) => set('phone', e.target.value)}
-          error={errors.phone}
-        />
+        <Input label="Nome *" placeholder="Seu nome completo" value={form.name}
+          onChange={(e) => set('name', e.target.value)} error={errors.name} />
+        <Input label="Telefone / WhatsApp *" placeholder="(00) 00000-0000" value={form.phone}
+          onChange={(e) => set('phone', e.target.value)} error={errors.phone} />
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <Input
-          label="Cidade *"
-          placeholder="Ex.: Campinas"
-          value={form.city}
-          onChange={(e) => set('city', e.target.value)}
-          error={errors.city}
-        />
-        <Input
-          label="Bairro"
-          placeholder="Ex.: Centro"
-          value={form.neighborhood}
-          onChange={(e) => set('neighborhood', e.target.value)}
-        />
+        <Input label="Cidade *" placeholder="Ex.: Campinas" value={form.city}
+          onChange={(e) => set('city', e.target.value)} error={errors.city} />
+        <Input label="Bairro" placeholder="Ex.: Centro" value={form.neighborhood}
+          onChange={(e) => set('neighborhood', e.target.value)} />
       </div>
 
       <div className="mt-4">
-        <Select
-          label="Tipo de serviço"
-          options={[...serviceTypeOptions]}
-          value={form.serviceType}
-          onChange={(e) => set('serviceType', e.target.value)}
-        />
+        <Select label="Tipo de serviço" options={[...serviceTypeOptions]} value={form.serviceType}
+          onChange={(e) => set('serviceType', e.target.value)} />
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <Select
-          label="Faixa de orçamento"
-          options={budgetOptions}
-          value={form.budgetRange}
-          onChange={(e) => set('budgetRange', e.target.value)}
-        />
-        <Select
-          label="Prazo desejado"
-          options={timelineOptions}
-          value={form.desiredTimeline}
-          onChange={(e) => set('desiredTimeline', e.target.value)}
-        />
+        <Select label="Faixa de orçamento" options={budgetOptions} value={form.budgetRange}
+          onChange={(e) => set('budgetRange', e.target.value)} />
+        <Select label="Prazo desejado" options={timelineOptions} value={form.desiredTimeline}
+          onChange={(e) => set('desiredTimeline', e.target.value)} />
       </div>
 
       <div className="mt-4">
-        <Textarea
-          label="Descreva o que deseja fazer *"
-          placeholder="Ex.: Quero reformar a cozinha, trocar piso, mexer na hidráulica e pintar. O imóvel fica no bairro X."
-          rows={4}
-          value={form.description}
-          onChange={(e) => set('description', e.target.value)}
-          error={errors.description}
-        />
+        <Textarea label="Descreva o que deseja fazer *"
+          placeholder="Ex.: Quero reformar a cozinha, trocar piso, mexer na hidráulica e pintar."
+          rows={4} value={form.description} onChange={(e) => set('description', e.target.value)}
+          error={errors.description} />
       </div>
 
       <div className="mt-4">
-        <Textarea
-          label="Observações"
-          placeholder="Informações adicionais, restrições, preferências..."
-          rows={2}
-          value={form.notes}
-          onChange={(e) => set('notes', e.target.value)}
-        />
+        <Textarea label="Observações" placeholder="Informações adicionais, restrições, preferências..."
+          rows={2} value={form.notes} onChange={(e) => set('notes', e.target.value)} />
       </div>
 
       <Button type="submit" loading={loading} size="lg" className="mt-5 w-full">

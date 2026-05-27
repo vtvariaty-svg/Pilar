@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Calendar, X } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import ProtectedRoute from '../../components/admin/ProtectedRoute'
+import TenantAdminRoute from '../../components/route/TenantAdminRoute'
 import { subscribeAppointments, updateAppointmentStatus, updateAppointmentNotes } from '../../services/appointmentService'
 import { formatDate } from '../../utils/formatDate'
 import type { Appointment, AppointmentStatus } from '../../types/Appointment'
@@ -45,7 +45,7 @@ export default function AdminAppointmentsPage() {
   const past = appointments.filter((a) => a.status === 'realizado' || a.status === 'cancelado')
 
   return (
-    <ProtectedRoute>
+    <TenantAdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Agendamentos</h1>
@@ -148,7 +148,7 @@ export default function AdminAppointmentsPage() {
           </div>
         )}
       </AdminLayout>
-    </ProtectedRoute>
+    </TenantAdminRoute>
   )
 }
 

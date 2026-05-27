@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Users, TrendingUp } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import ProtectedRoute from '../../components/admin/ProtectedRoute'
+import TenantAdminRoute from '../../components/route/TenantAdminRoute'
 import LeadCard from '../../components/admin/LeadCard'
 import LeadFilters from '../../components/admin/LeadFilters'
 import LeadDetails from '../../components/admin/LeadDetails'
@@ -43,7 +43,7 @@ export default function AdminLeadsPage() {
   const newCount = leads.filter((l) => l.status === 'novo').length
 
   return (
-    <ProtectedRoute>
+    <TenantAdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Pedidos</h1>
@@ -105,6 +105,6 @@ export default function AdminLeadsPage() {
           />
         )}
       </AdminLayout>
-    </ProtectedRoute>
+    </TenantAdminRoute>
   )
 }

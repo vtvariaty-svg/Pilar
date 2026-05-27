@@ -2,83 +2,163 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isAdmin() {
-      return request.auth != null
-        && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    function signedIn() {
+      return request.auth != null;
     }
+
+    function isPlatformAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.globalRole == 'platform_admin';
+    }
+
+    function tenantRole(tenantId) {
+      return get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role;
+    }
+
+    function isTenantMember(tenantId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid));
+    }
+
+    function isTenantStaff(tenantId) {
+      return isPlatformAdmin()
+        || (isTenantMember(tenantId) && tenantRole(tenantId) in ['owner', 'admin', 'operator'])
+        || (signedIn() && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)));
+    }
+
+    // ── Global collections ─────────────────────────────────────────────
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isPlatformAdmin());
+      allow create: if signedIn() && request.auth.uid == uid;
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['name', 'phone', 'updatedAt']);
+      allow delete: if isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId} {
+      allow read: if true;
+      allow write: if isPlatformAdmin();
+    }
+
+    match /adminUsers/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isPlatformAdmin());
+      allow write: if isPlatformAdmin();
+    }
+
+    // ── Tenant subcollections ──────────────────────────────────────────
+
+    match /tenants/{tenantId}/members/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isTenantStaff(tenantId) || isPlatformAdmin());
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.role == 'customer';
+      allow update, delete: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId}/customers/{uid} {
+      allow read: if (signedIn() && request.auth.uid == uid) || isTenantStaff(tenantId) || isPlatformAdmin();
+      allow create: if signedIn() && request.auth.uid == uid;
+      allow update: if (signedIn() && request.auth.uid == uid) || isTenantStaff(tenantId);
+      allow delete: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId}/leads/{leadId} {
+      allow create: if
+        request.resource.data.keys().hasAll(['name', 'phone', 'serviceType', 'source', 'status', 'tenantId', 'createdAt', 'updatedAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() > 0
+        && request.resource.data.phone is string && request.resource.data.phone.size() > 0
+        && request.resource.data.status == 'novo'
+        && request.resource.data.source in ['site', 'calculator', 'admin'];
+      allow read: if isTenantStaff(tenantId) || isPlatformAdmin()
+        || (signedIn() && resource.data.customerUid == request.auth.uid);
+      allow update: if isTenantStaff(tenantId) || isPlatformAdmin();
+      allow delete: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId}/quoteEstimates/{quoteId} {
+      allow create: if
+        request.resource.data.keys().hasAll(['client', 'serviceType', 'inputs', 'calculation', 'status', 'source', 'tenantId', 'createdAt', 'updatedAt'])
+        && request.resource.data.status == 'estimativa_criada'
+        && request.resource.data.source == 'calculator';
+      allow read: if isTenantStaff(tenantId) || isPlatformAdmin()
+        || (signedIn() && resource.data.customerUid == request.auth.uid);
+      allow update: if isTenantStaff(tenantId) || isPlatformAdmin();
+      allow delete: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId}/appointments/{apptId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasAll(['clientName', 'phone', 'serviceType', 'date', 'startTime', 'status', 'tenantId', 'createdAt', 'updatedAt'])
+        && request.resource.data.status == 'solicitado';
+      allow read: if isTenantStaff(tenantId) || isPlatformAdmin()
+        || (signedIn() && resource.data.customerUid == request.auth.uid);
+      allow update: if isTenantStaff(tenantId) || isPlatformAdmin();
+      allow delete: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId}/pricingSettings/{id} {
+      allow read: if true;
+      allow write: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId}/serviceCatalog/{id} {
+      allow read: if true;
+      allow write: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId}/settings/{id} {
+      allow read: if true;
+      allow write: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId}/portfolio/{id} {
+      allow read: if true;
+      allow write: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    // ── Legacy collections (backward compat) ──────────────────────────
 
     match /leads/{leadId} {
       allow create: if
         request.resource.data.keys().hasAll(['name', 'phone', 'serviceType', 'source', 'status', 'createdAt', 'updatedAt'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 200
-        && request.resource.data.phone is string
-        && request.resource.data.phone.size() > 0
+        && request.resource.data.name is string && request.resource.data.name.size() > 0
+        && request.resource.data.phone is string && request.resource.data.phone.size() > 0
         && request.resource.data.source == 'site'
-        && request.resource.data.status == 'novo'
-        && request.resource.data.serviceType in [
-             'Construção do zero',
-             'Reforma completa',
-             'Ampliação',
-             'Banheiro/cozinha',
-             'Acabamento',
-             'Telhado',
-             'Área externa',
-             'Outro'
-           ];
-      allow read: if isAdmin();
-      allow update: if
-        isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'internalNotes', 'updatedAt'])
-        && (
-          !request.resource.data.keys().hasAny(['status'])
-          || request.resource.data.status in [
-               'novo', 'em_atendimento', 'visita_agendada',
-               'proposta_enviada', 'fechado', 'perdido'
-             ]
-        );
-      allow delete: if isAdmin();
+        && request.resource.data.status == 'novo';
+      allow read: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow update: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow delete: if isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /quoteEstimates/{id} {
-      allow create: if
-        request.resource.data.keys().hasAll(['client', 'serviceType', 'inputs', 'calculation', 'status', 'source', 'createdAt', 'updatedAt'])
-        && request.resource.data.status == 'estimativa_criada'
-        && request.resource.data.source == 'calculator';
-      allow read, update, delete: if isAdmin();
+      allow read: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /appointments/{id} {
-      allow create: if
-        request.resource.data.keys().hasAll(['clientName', 'phone', 'serviceType', 'date', 'startTime', 'status', 'createdAt', 'updatedAt'])
-        && request.resource.data.status == 'solicitado';
-      allow read, update, delete: if isAdmin();
+      allow read: if isTenantStaff('pilar') || isPlatformAdmin();
+      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /pricingSettings/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /serviceCatalog/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /platformSettings/{id} {
       allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    match /adminUsers/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if isAdmin();
+      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
     }
 
     match /portfolio/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isTenantStaff('pilar') || isPlatformAdmin();
     }
   }
 }

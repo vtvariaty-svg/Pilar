@@ -2,8 +2,8 @@ import { type ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 
-export default function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { user, isTenantStaff, loading } = useAuth()
+export default function CustomerRoute({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth()
 
   if (loading) {
     return (
@@ -14,6 +14,5 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   }
 
   if (!user) return <Navigate to="/entrar" replace />
-  if (!isTenantStaff) return <Navigate to="/cliente" replace />
   return <>{children}</>
 }

@@ -4,7 +4,7 @@ import {
 import { db } from './firebase'
 import type { ServiceCatalog } from '../types/ServiceCatalog'
 
-const COL = 'serviceCatalog'
+const DEFAULT_TENANT = 'pilar'
 
 const DEFAULT_SERVICES: ServiceCatalog[] = [
   { id: 'construcao-zero', name: 'Construção do zero', description: 'Casas, sobrados e imóveis comerciais do alicerce ao acabamento.', active: true, icon: 'Home', order: 1, updatedAt: null as never },
@@ -16,19 +16,23 @@ const DEFAULT_SERVICES: ServiceCatalog[] = [
   { id: 'area-externa', name: 'Área externa', description: 'Muros, garagens, pergolados e áreas de lazer.', active: true, icon: 'Trees', order: 7, updatedAt: null as never },
 ]
 
-export async function getServiceCatalog(): Promise<ServiceCatalog[]> {
-  const snap = await getDocs(collection(db, COL))
+function tenantCatalogCol(tenantId: string) {
+  return collection(db, `tenants/${tenantId}/serviceCatalog`)
+}
+
+export async function getServiceCatalog(tenantId = DEFAULT_TENANT): Promise<ServiceCatalog[]> {
+  const snap = await getDocs(tenantCatalogCol(tenantId))
   if (snap.empty) return DEFAULT_SERVICES
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ServiceCatalog).sort((a, b) => a.order - b.order)
 }
 
-export function subscribeServiceCatalog(cb: (items: ServiceCatalog[]) => void): Unsubscribe {
-  return onSnapshot(collection(db, COL), (snap) => {
+export function subscribeServiceCatalog(cb: (items: ServiceCatalog[]) => void, tenantId = DEFAULT_TENANT): Unsubscribe {
+  return onSnapshot(tenantCatalogCol(tenantId), (snap) => {
     if (snap.empty) { cb(DEFAULT_SERVICES); return }
     cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ServiceCatalog).sort((a, b) => a.order - b.order))
   })
 }
 
-export async function toggleService(id: string, active: boolean): Promise<void> {
-  await setDoc(doc(db, COL, id), { active, updatedAt: serverTimestamp() }, { merge: true })
+export async function toggleService(id: string, active: boolean, tenantId = DEFAULT_TENANT): Promise<void> {
+  await setDoc(doc(db, `tenants/${tenantId}/serviceCatalog`, id), { active, updatedAt: serverTimestamp() }, { merge: true })
 }

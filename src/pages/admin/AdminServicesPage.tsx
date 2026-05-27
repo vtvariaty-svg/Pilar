@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Layers } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import ProtectedRoute from '../../components/admin/ProtectedRoute'
+import TenantAdminRoute from '../../components/route/TenantAdminRoute'
 import { subscribeServiceCatalog, toggleService } from '../../services/serviceCatalogService'
 import type { ServiceCatalog } from '../../types/ServiceCatalog'
 
@@ -25,7 +25,7 @@ export default function AdminServicesPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <TenantAdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Serviços</h1>
@@ -73,6 +73,6 @@ export default function AdminServicesPage() {
           </div>
         )}
       </AdminLayout>
-    </ProtectedRoute>
+    </TenantAdminRoute>
   )
 }

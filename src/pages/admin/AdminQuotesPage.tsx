@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Calculator, ChevronRight, X } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import ProtectedRoute from '../../components/admin/ProtectedRoute'
+import TenantAdminRoute from '../../components/route/TenantAdminRoute'
 import { subscribeQuoteEstimates, updateQuoteStatus } from '../../services/quoteEstimateService'
 import { formatCurrency } from '../../services/quoteCalculator'
 import { formatDate } from '../../utils/formatDate'
@@ -44,7 +44,7 @@ export default function AdminQuotesPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <TenantAdminRoute>
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Estimativas</h1>
@@ -165,6 +165,6 @@ export default function AdminQuotesPage() {
           </div>
         )}
       </AdminLayout>
-    </ProtectedRoute>
+    </TenantAdminRoute>
   )
 }

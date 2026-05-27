@@ -1,4 +1,5 @@
 import { env } from './env'
+import { normalizeBrazilPhone } from './phone'
 
 export function whatsappLink(message: string): string {
   return `https://wa.me/${env.whatsappNumber}?text=${encodeURIComponent(message)}`
@@ -35,7 +36,7 @@ export function whatsappLinkFromLead(data: {
 }
 
 export function whatsappLinkForLead(phone: string, name: string): string {
-  const number = phone.replace(/\D/g, '')
+  const number = normalizeBrazilPhone(phone)
   const message = `Olá, ${name}! Sou da ${env.companyName} e estou entrando em contato sobre sua solicitação de orçamento.`
   return `https://wa.me/55${number}?text=${encodeURIComponent(message)}`
 }
