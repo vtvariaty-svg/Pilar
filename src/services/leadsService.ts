@@ -105,14 +105,20 @@ export function subscribeCustomerLeads(
   customerUid: string,
   tenantId: string,
   callback: (leads: Lead[]) => void,
+  onError?: (err: Error) => void,
 ): Unsubscribe {
   const q = query(
     tenantLeadsCol(tenantId),
     where('customerUid', '==', customerUid),
     orderBy('createdAt', 'desc'),
   )
-  return onSnapshot(q, (snap) =>
-    callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Lead)),
+  return onSnapshot(
+    q,
+    (snap) => callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Lead)),
+    (err) => {
+      console.error('[subscribeCustomerLeads]', err)
+      onError ? onError(err) : callback([])
+    },
   )
 }
 

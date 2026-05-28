@@ -13,14 +13,17 @@ export default function ClientQuotesPage() {
   const { user, currentTenantId } = useAuth()
   const [quotes, setQuotes] = useState<QuoteEstimate[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
-    const unsub = subscribeCustomerQuotes(user.uid, currentTenantId, (data) => {
-      setQuotes(data)
-      setLoading(false)
-    })
+    const unsub = subscribeCustomerQuotes(
+      user.uid,
+      currentTenantId,
+      (data) => { setQuotes(data); setLoading(false) },
+      () => { setLoadError(true); setLoading(false) },
+    )
     return unsub
   }, [user, currentTenantId])
 
@@ -35,6 +38,10 @@ export default function ClientQuotesPage() {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-950" />
+          </div>
+        ) : loadError ? (
+          <div className="rounded-2xl border border-red-100 bg-red-50 p-5 text-sm text-red-700">
+            Não foi possível carregar suas estimativas. Tente recarregar a página.
           </div>
         ) : quotes.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-3xl border border-neutral-200 bg-white py-16 text-center">

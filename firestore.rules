@@ -139,7 +139,14 @@ service cloud.firestore {
         || (signedIn()
             && get(/databases/$(database)/documents/tenants/$(tenantId)/leads/$(leadId)).data.customerUid == request.auth.uid
             && resource.data.visibility == 'customer');
-      allow create, update, delete: if isTenantStaff(tenantId) || isPlatformAdmin();
+      allow create: if isTenantStaff(tenantId) || isPlatformAdmin()
+        || (signedIn()
+            && get(/databases/$(database)/documents/tenants/$(tenantId)/leads/$(leadId)).data.customerUid == request.auth.uid
+            && request.resource.data.visibility == 'customer'
+            && request.resource.data.type in ['quote_created', 'lead_created', 'appointment_requested']
+            && request.resource.data.title is string
+            && request.resource.data.keys().hasOnly(['type', 'title', 'description', 'visibility', 'createdBy', 'createdAt']));
+      allow update, delete: if isTenantStaff(tenantId) || isPlatformAdmin();
     }
 
     match /tenants/{tenantId}/proposals/{proposalId} {

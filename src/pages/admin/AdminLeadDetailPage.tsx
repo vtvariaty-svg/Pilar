@@ -113,12 +113,12 @@ export default function AdminLeadDetailPage() {
     return unsub
   }, [leadId])
 
-  // Auto-backfill eventos iniciais para leads criados a partir de estimativa
+  // legacyBackfill: apenas para leads antigos sem timeline (criados antes do fluxo de serviço gerar a timeline automaticamente)
   useEffect(() => {
     if (!lead || !leadId || backfillDone.current) return
     if (timeline.length > 0 || !lead.quoteEstimateId) return
     backfillDone.current = true
-    const backfill = async () => {
+    const legacyBackfill = async () => {
       await createTimelineEvent(TENANT, leadId, {
         type: 'quote_created',
         title: 'Estimativa criada pelo cliente',
@@ -132,7 +132,7 @@ export default function AdminLeadDetailPage() {
         createdBy: lead.customerUid,
       })
     }
-    backfill()
+    legacyBackfill()
   }, [lead, leadId, timeline])
 
   async function handleStatusChange(status: LeadStatus) {

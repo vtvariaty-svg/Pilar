@@ -11,13 +11,16 @@ export default function ClientAppointmentsPage() {
   const { user, currentTenantId } = useAuth()
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     if (!user) return
-    const unsub = subscribeCustomerAppointments(user.uid, currentTenantId, (data) => {
-      setAppointments(data)
-      setLoading(false)
-    })
+    const unsub = subscribeCustomerAppointments(
+      user.uid,
+      currentTenantId,
+      (data) => { setAppointments(data); setLoading(false) },
+      () => { setLoadError(true); setLoading(false) },
+    )
     return unsub
   }, [user, currentTenantId])
 
@@ -32,6 +35,10 @@ export default function ClientAppointmentsPage() {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-950" />
+          </div>
+        ) : loadError ? (
+          <div className="rounded-2xl border border-red-100 bg-red-50 p-5 text-sm text-red-700">
+            Não foi possível carregar seus agendamentos. Tente recarregar a página.
           </div>
         ) : appointments.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-3xl border border-neutral-200 bg-white py-16 text-center">

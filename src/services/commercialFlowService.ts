@@ -71,6 +71,8 @@ export async function convertQuoteToLead(
   const quote = await getQuoteEstimate(tenantId, quoteId)
   if (!quote) throw new Error('Estimativa não encontrada')
 
+  if (quote.leadId) return quote.leadId
+
   const uid = customerUid ?? quote.customerUid
 
   const leadId = await createLead(
@@ -94,6 +96,25 @@ export async function convertQuoteToLead(
     updatedAt: serverTimestamp(),
   })
 
+  try {
+    await createTimelineEvent(tenantId, leadId, {
+      type: 'quote_created',
+      title: 'Estimativa gerada',
+      description: `Estimativa para ${quote.serviceType} criada pela calculadora.`,
+      visibility: 'customer',
+      createdBy: uid,
+    })
+    await createTimelineEvent(tenantId, leadId, {
+      type: 'lead_created',
+      title: 'Solicitação enviada',
+      description: 'Você solicitou análise da estimativa. Nossa equipe entrará em contato.',
+      visibility: 'customer',
+      createdBy: uid,
+    })
+  } catch (err) {
+    console.warn('[convertQuoteToLead] timeline creation failed:', err)
+  }
+
   return leadId
 }
 
@@ -105,6 +126,8 @@ export async function requestVisitFromQuote(
   const appointmentId = await createAppointment({
     ...appointmentData,
     quoteEstimateId: quoteId,
+    leadId: appointmentData.leadId,
+    customerUid: appointmentData.customerUid,
     tenantId,
   })
 
@@ -120,12 +143,17 @@ export async function requestVisitFromQuote(
       status: 'visita_agendada',
       updatedAt: serverTimestamp(),
     })
-    await createTimelineEvent(tenantId, appointmentData.leadId, {
-      type: 'appointment_requested',
-      title: 'Visita técnica solicitada',
-      visibility: 'customer',
-      createdBy: appointmentData.customerUid,
-    })
+    try {
+      await createTimelineEvent(tenantId, appointmentData.leadId, {
+        type: 'appointment_requested',
+        title: 'Visita técnica solicitada',
+        description: `Data preferida: ${appointmentData.date} às ${appointmentData.startTime}`,
+        visibility: 'customer',
+        createdBy: appointmentData.customerUid,
+      })
+    } catch (err) {
+      console.warn('[requestVisitFromQuote] timeline creation failed:', err)
+    }
   }
 
   return appointmentId

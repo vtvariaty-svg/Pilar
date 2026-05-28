@@ -1,14 +1,23 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { HardHat, UserPlus } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { env } from '../utils/env'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import { claimQuoteForCustomer } from '../services/quoteEstimateService'
+import { convertQuoteToLead } from '../services/commercialFlowService'
+
+interface LocationState {
+  from?: string
+  quoteId?: string
+}
 
 export default function SignUp() {
   const { signUp, user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const state = (location.state as LocationState) ?? {}
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -29,8 +38,19 @@ export default function SignUp() {
     if (form.password !== form.confirm) { setError('As senhas não conferem.'); return }
     setLoading(true)
     try {
-      await signUp(form.email, form.password, { name: form.name, phone: form.phone })
-      navigate('/cliente', { replace: true })
+      const uid = await signUp(form.email, form.password, { name: form.name, phone: form.phone })
+
+      if (state.quoteId) {
+        try {
+          await claimQuoteForCustomer('pilar', state.quoteId, uid)
+          const leadId = await convertQuoteToLead(state.quoteId, 'pilar', uid)
+          navigate(`/cliente/solicitacoes/${leadId}`, { replace: true })
+        } catch {
+          navigate('/cliente', { replace: true })
+        }
+      } else {
+        navigate('/cliente', { replace: true })
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : ''
       if (msg.includes('email-already-in-use')) setError('Este e-mail já está em uso.')

@@ -1,8 +1,10 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { HardHat, Calendar, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { createAppointment } from '../services/appointmentService'
+import { claimQuoteForCustomer } from '../services/quoteEstimateService'
+import { convertQuoteToLead, requestVisitFromQuote } from '../services/commercialFlowService'
 import { env } from '../utils/env'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
@@ -36,6 +38,15 @@ export default function ScheduleVisit() {
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    if (state.quoteEstimateId && !user) {
+      navigate('/criar-conta', {
+        state: { quoteId: state.quoteEstimateId, from: '/agendar' },
+        replace: true,
+      })
+    }
+  }, [state.quoteEstimateId, user, navigate])
+
   function patch(key: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
@@ -49,19 +60,40 @@ export default function ScheduleVisit() {
     setLoading(true)
     setError('')
     try {
-      await createAppointment({
-        clientName: form.clientName,
-        phone: form.phone,
-        city: form.city,
-        neighborhood: form.neighborhood,
-        serviceType: form.serviceType,
-        date: form.date,
-        startTime: form.startTime,
-        notes: form.notes,
-        quoteEstimateId: state.quoteEstimateId,
-        customerUid: user?.uid,
-      })
-      setDone(true)
+      if (state.quoteEstimateId && user) {
+        await claimQuoteForCustomer('pilar', state.quoteEstimateId, user.uid)
+        const leadId = await convertQuoteToLead(state.quoteEstimateId, 'pilar', user.uid)
+        await requestVisitFromQuote(
+          state.quoteEstimateId,
+          {
+            clientName: form.clientName,
+            phone: form.phone,
+            city: form.city,
+            neighborhood: form.neighborhood,
+            serviceType: form.serviceType,
+            date: form.date,
+            startTime: form.startTime,
+            notes: form.notes,
+            customerUid: user.uid,
+            leadId,
+          },
+          'pilar',
+        )
+        navigate(`/cliente/solicitacoes/${leadId}`, { replace: true })
+      } else {
+        await createAppointment({
+          clientName: form.clientName,
+          phone: form.phone,
+          city: form.city,
+          neighborhood: form.neighborhood,
+          serviceType: form.serviceType,
+          date: form.date,
+          startTime: form.startTime,
+          notes: form.notes,
+          customerUid: user?.uid,
+        })
+        setDone(true)
+      }
     } catch {
       setError('Erro ao enviar agendamento. Tente novamente.')
     } finally {

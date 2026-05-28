@@ -137,14 +137,20 @@ export function subscribeLeadProposals(
   tenantId: string,
   leadId: string,
   cb: (items: Proposal[]) => void,
+  onError?: (err: Error) => void,
 ): Unsubscribe {
   const q = query(
     tenantProposalsCol(tenantId),
     where('leadId', '==', leadId),
     orderBy('createdAt', 'desc'),
   )
-  return onSnapshot(q, (snap) =>
-    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Proposal)),
+  return onSnapshot(
+    q,
+    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Proposal)),
+    (err) => {
+      console.error('[subscribeLeadProposals]', err)
+      onError ? onError(err) : cb([])
+    },
   )
 }
 
@@ -152,6 +158,7 @@ export function subscribeCustomerProposals(
   tenantId: string,
   customerUid: string,
   cb: (items: Proposal[]) => void,
+  onError?: (err: Error) => void,
 ): Unsubscribe {
   const q = query(
     tenantProposalsCol(tenantId),
@@ -159,7 +166,12 @@ export function subscribeCustomerProposals(
     where('status', 'in', ['enviada', 'aceita', 'recusada']),
     orderBy('createdAt', 'desc'),
   )
-  return onSnapshot(q, (snap) =>
-    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Proposal)),
+  return onSnapshot(
+    q,
+    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Proposal)),
+    (err) => {
+      console.error('[subscribeCustomerProposals]', err)
+      onError ? onError(err) : cb([])
+    },
   )
 }

@@ -37,7 +37,7 @@ interface AuthContextValue {
     email: string,
     password: string,
     profile: { name: string; phone: string },
-  ) => Promise<void>
+  ) => Promise<string>
   logout: () => Promise<void>
 }
 
@@ -98,12 +98,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string,
     profile: { name: string; phone: string },
-  ) {
+  ): Promise<string> {
     const cred = await createUserWithEmailAndPassword(auth, email, password)
     const uid = cred.user.uid
     await createUserProfile(uid, { email, ...profile })
     await createCustomer(uid, { email, ...profile, tenantId: DEFAULT_TENANT })
     await setTenantMember(DEFAULT_TENANT, uid, 'customer', { displayName: profile.name, email })
+    return uid
   }
 
   async function logout() {

@@ -44,13 +44,39 @@ export function subscribeCustomerQuotes(
   customerUid: string,
   tenantId: string,
   cb: (items: QuoteEstimate[]) => void,
+  onError?: (err: Error) => void,
 ): Unsubscribe {
   const q = query(
     tenantQuotesCol(tenantId),
     where('customerUid', '==', customerUid),
     orderBy('createdAt', 'desc'),
   )
-  return onSnapshot(q, (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as QuoteEstimate)))
+  return onSnapshot(
+    q,
+    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as QuoteEstimate)),
+    (err) => {
+      console.error('[subscribeCustomerQuotes]', err)
+      onError ? onError(err) : cb([])
+    },
+  )
+}
+
+export async function claimQuoteForCustomer(
+  tenantId: string,
+  quoteId: string,
+  customerUid: string,
+): Promise<void> {
+  const quote = await getQuoteEstimate(tenantId, quoteId)
+  if (!quote) throw new Error('Estimativa não encontrada')
+  if (quote.customerUid && quote.customerUid !== customerUid) {
+    throw new Error('Esta estimativa já pertence a outro usuário')
+  }
+  if (!quote.customerUid) {
+    await updateDoc(doc(db, `tenants/${tenantId}/quoteEstimates`, quoteId), {
+      customerUid,
+      updatedAt: serverTimestamp(),
+    })
+  }
 }
 
 export async function updateQuoteStatus(id: string, status: QuoteStatus, tenantId = DEFAULT_TENANT): Promise<void> {

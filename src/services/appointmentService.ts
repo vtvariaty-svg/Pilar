@@ -19,6 +19,7 @@ export interface AppointmentFormData {
   address?: string
   serviceType: string
   quoteEstimateId?: string
+  leadId?: string
   date: string
   startTime: string
   notes?: string
@@ -49,13 +50,21 @@ export function subscribeCustomerAppointments(
   customerUid: string,
   tenantId: string,
   cb: (items: Appointment[]) => void,
+  onError?: (err: Error) => void,
 ): Unsubscribe {
   const q = query(
     tenantAppCol(tenantId),
     where('customerUid', '==', customerUid),
     orderBy('createdAt', 'desc'),
   )
-  return onSnapshot(q, (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Appointment)))
+  return onSnapshot(
+    q,
+    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Appointment)),
+    (err) => {
+      console.error('[subscribeCustomerAppointments]', err)
+      onError ? onError(err) : cb([])
+    },
+  )
 }
 
 export async function updateAppointmentStatus(id: string, status: AppointmentStatus, tenantId = DEFAULT_TENANT): Promise<void> {
