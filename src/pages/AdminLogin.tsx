@@ -16,8 +16,26 @@ export default function AdminLogin() {
 
   useEffect(() => {
     if (loading || !user) return
-    if (isPlatformAdmin) { navigate('/platform', { replace: true }); return }
-    if (isAdminUser) { navigate('/admin/dashboard', { replace: true }); return }
+
+    if (isPlatformAdmin) {
+      setSubmitting(false)
+      navigate('/platform', { replace: true })
+      return
+    }
+
+    if (isAdminUser) {
+      setSubmitting(false)
+      navigate('/admin/dashboard', { replace: true })
+      return
+    }
+
+    if (user.email === 'vtvariaty@gmail.com') {
+      setSubmitting(false)
+      navigate('/admin/bootstrap', { replace: true })
+      return
+    }
+
+    setSubmitting(false)
     logout().then(() => setError('Sua conta não tem acesso ao painel administrativo.'))
   }, [loading, user, isAdminUser, isPlatformAdmin, navigate, logout])
 

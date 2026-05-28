@@ -58,7 +58,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
+      setLoading(true)
       setUser(u)
+
       if (!u) {
         setUserProfile(null)
         setTenantMemberState(null)
@@ -67,25 +69,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      const [profileSnap, memberSnap, adminSnap] = await Promise.all([
-        getDoc(doc(db, 'users', u.uid)),
-        getDoc(doc(db, `tenants/${DEFAULT_TENANT}/members`, u.uid)),
-        getDoc(doc(db, 'adminUsers', u.uid)),
-      ])
+      try {
+        const [profileSnap, memberSnap, adminSnap] = await Promise.all([
+          getDoc(doc(db, 'users', u.uid)),
+          getDoc(doc(db, `tenants/${DEFAULT_TENANT}/members`, u.uid)),
+          getDoc(doc(db, 'adminUsers', u.uid)),
+        ])
 
-      setUserProfile(profileSnap.exists() ? ({ uid: u.uid, ...profileSnap.data() } as UserProfile) : null)
+        const adminData = adminSnap.exists()
+          ? ({ uid: u.uid, ...adminSnap.data() } as AdminUser)
+          : null
 
-      if (memberSnap.exists()) {
-        setTenantMemberState({ uid: u.uid, ...memberSnap.data() } as TenantMember)
-      } else if (adminSnap.exists()) {
-        setTenantMemberState({ uid: u.uid, tenantId: DEFAULT_TENANT, role: 'admin', createdAt: null as never, updatedAt: null as never })
-      } else {
+        setUserProfile(profileSnap.exists() ? ({ uid: u.uid, ...profileSnap.data() } as UserProfile) : null)
+        setAdminUserData(adminData)
+
+        if (memberSnap.exists()) {
+          setTenantMemberState({ uid: u.uid, ...memberSnap.data() } as TenantMember)
+        } else if (adminData?.active === true) {
+          setTenantMemberState({
+            uid: u.uid,
+            tenantId: DEFAULT_TENANT,
+            role: adminData.role === 'super_admin' ? 'owner' : 'admin',
+            createdAt: null as never,
+            updatedAt: null as never,
+          })
+        } else {
+          setTenantMemberState(null)
+        }
+      } catch (err) {
+        console.error('[AuthContext] failed to load user context', err)
+        setUserProfile(null)
         setTenantMemberState(null)
+        setAdminUserData(null)
+      } finally {
+        setLoading(false)
       }
-
-      setAdminUserData(adminSnap.exists() ? ({ uid: u.uid, ...adminSnap.data() } as AdminUser) : null)
-
-      setLoading(false)
     })
     return unsub
   }, [])
