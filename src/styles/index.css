@@ -11,3 +11,31 @@
     @apply bg-neutral-50 text-neutral-950 antialiased;
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  body {
+    background: white !important;
+    font-size: 12pt;
+  }
+
+  .print-page {
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 20mm;
+    background: white;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+.print-only {
+  display: none;
+}

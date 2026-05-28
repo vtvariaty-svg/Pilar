@@ -2,6 +2,7 @@ import {
   collection,
   addDoc,
   doc,
+  getDoc,
   updateDoc,
   query,
   orderBy,
@@ -27,20 +28,48 @@ function leadDocRef(lead: Lead) {
 
 export async function createLead(
   data: LeadFormData,
-  opts?: { customerUid?: string; tenantId?: string },
+  opts?: { customerUid?: string; tenantId?: string; quoteEstimateId?: string; source?: Lead['source'] },
 ): Promise<string> {
   const tenantId = opts?.tenantId ?? DEFAULT_TENANT
   const ref = await addDoc(tenantLeadsCol(tenantId), {
     ...data,
-    source: 'site',
+    source: opts?.source ?? 'site',
     status: 'novo',
     internalNotes: '',
     tenantId,
     ...(opts?.customerUid ? { customerUid: opts.customerUid } : {}),
+    ...(opts?.quoteEstimateId ? { quoteEstimateId: opts.quoteEstimateId } : {}),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   })
   return ref.id
+}
+
+export async function getLeadById(tenantId: string, leadId: string): Promise<Lead | null> {
+  const snap = await getDoc(doc(db, `tenants/${tenantId}/leads`, leadId))
+  if (!snap.exists()) return null
+  return { id: snap.id, ...snap.data() } as Lead
+}
+
+export function subscribeLeadById(
+  tenantId: string,
+  leadId: string,
+  callback: (lead: Lead | null) => void,
+): Unsubscribe {
+  return onSnapshot(doc(db, `tenants/${tenantId}/leads`, leadId), (snap) =>
+    callback(snap.exists() ? ({ id: snap.id, ...snap.data() } as Lead) : null),
+  )
+}
+
+export async function updateLeadFields(
+  tenantId: string,
+  leadId: string,
+  fields: Partial<Omit<Lead, 'id' | 'createdAt'>>,
+): Promise<void> {
+  await updateDoc(doc(db, `tenants/${tenantId}/leads`, leadId), {
+    ...fields,
+    updatedAt: serverTimestamp(),
+  })
 }
 
 export function subscribeLeads(callback: (leads: Lead[]) => void): Unsubscribe {

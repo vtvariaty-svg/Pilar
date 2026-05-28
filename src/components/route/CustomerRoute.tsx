@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 
 export default function CustomerRoute({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, loading, isPlatformAdmin, isAdminUser } = useAuth()
 
   if (loading) {
     return (
@@ -14,5 +14,7 @@ export default function CustomerRoute({ children }: { children: ReactNode }) {
   }
 
   if (!user) return <Navigate to="/entrar" replace />
+  if (isPlatformAdmin) return <Navigate to="/platform" replace />
+  if (isAdminUser) return <Navigate to="/admin/dashboard" replace />
   return <>{children}</>
 }

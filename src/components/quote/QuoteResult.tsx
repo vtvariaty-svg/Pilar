@@ -1,4 +1,4 @@
-import { CheckCircle2, Calendar, MessageCircle, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react'
+import { CheckCircle2, Calendar, MessageCircle, AlertTriangle, ChevronDown, ChevronUp, ClipboardList } from 'lucide-react'
 import { useState } from 'react'
 import type { QuoteCalculation, QuoteClient, QuoteInputs } from '../../types/QuoteEstimate'
 import { formatCurrency } from '../../services/quoteCalculator'
@@ -11,7 +11,10 @@ interface QuoteResultProps {
   client: QuoteClient
   calculation: QuoteCalculation
   onScheduleVisit: () => void
+  onRequestAnalysis: () => void
   onRestart: () => void
+  isLoggedIn?: boolean
+  isSavingAnalysis?: boolean
 }
 
 const CONFIDENCE_LABELS = {
@@ -20,7 +23,7 @@ const CONFIDENCE_LABELS = {
   baixa: { label: 'Baixa confiança', color: 'text-red-700 bg-red-50 border-red-200' },
 }
 
-export default function QuoteResult({ serviceType, inputs, client, calculation, onScheduleVisit, onRestart }: QuoteResultProps) {
+export default function QuoteResult({ serviceType, inputs, client, calculation, onScheduleVisit, onRequestAnalysis, onRestart, isLoggedIn, isSavingAnalysis }: QuoteResultProps) {
   const [showDetails, setShowDetails] = useState(false)
 
   const conf = CONFIDENCE_LABELS[calculation.confidence]
@@ -132,11 +135,23 @@ export default function QuoteResult({ serviceType, inputs, client, calculation, 
       {/* CTAs */}
       <div className="mt-6 flex flex-col gap-3">
         <button
+          onClick={onRequestAnalysis}
+          disabled={isSavingAnalysis}
+          className="flex items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-neutral-800 disabled:opacity-60"
+        >
+          {isSavingAnalysis ? (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+          ) : (
+            <ClipboardList className="h-4 w-4" />
+          )}
+          {isLoggedIn ? 'Solicitar análise' : 'Solicitar análise (criar conta)'}
+        </button>
+        <button
           onClick={onScheduleVisit}
-          className="flex items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-neutral-800"
+          className="flex items-center justify-center gap-2 rounded-xl border border-neutral-300 px-5 py-3.5 text-sm font-bold text-neutral-700 transition hover:bg-neutral-50"
         >
           <Calendar className="h-4 w-4" />
-          Agendar visita técnica gratuita
+          Agendar visita técnica
         </button>
         <a
           href={whatsappLink(whatsappMessage)}

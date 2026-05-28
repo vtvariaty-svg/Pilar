@@ -61,6 +61,8 @@ export interface QuoteEstimate {
   calculation: QuoteCalculation
   status: QuoteStatus
   source: 'calculator'
+  tenantId?: string
+  customerUid?: string
   leadId?: string
   appointmentId?: string
   createdAt: Timestamp

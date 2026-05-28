@@ -9,8 +9,10 @@ import QuoteResult from '../components/quote/QuoteResult'
 import { getPricingForService } from '../services/pricingSettingsService'
 import { calculateQuoteEstimate, getDefaultSettings } from '../services/quoteCalculator'
 import { createQuoteEstimate } from '../services/quoteEstimateService'
+import { convertQuoteToLead } from '../services/commercialFlowService'
 import type { QuoteInputs, QuoteClient, QuoteCalculation } from '../types/QuoteEstimate'
 import { env } from '../utils/env'
+import { useAuth } from '../contexts/AuthContext'
 
 const INITIAL_INPUTS: QuoteInputs = {
   areaM2: 0,
@@ -36,6 +38,7 @@ const INITIAL_CLIENT: QuoteClient = {
 
 export default function QuoteCalculator() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [step, setStep] = useState(0)
   const [serviceType, setServiceType] = useState('')
   const [inputs, setInputs] = useState<QuoteInputs>(INITIAL_INPUTS)
@@ -43,6 +46,8 @@ export default function QuoteCalculator() {
   const [calculation, setCalculation] = useState<QuoteCalculation | null>(null)
   const [loading, setLoading] = useState(false)
   const [saveWarning, setSaveWarning] = useState(false)
+  const [quoteId, setQuoteId] = useState<string | undefined>(undefined)
+  const [requestingAnalysis, setRequestingAnalysis] = useState(false)
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -56,7 +61,11 @@ export default function QuoteCalculator() {
       const calc = calculateQuoteEstimate(inputs, serviceType, settings)
       setCalculation(calc)
       try {
-        await createQuoteEstimate({ client, serviceType, inputs, calculation: calc })
+        const id = await createQuoteEstimate({
+          client, serviceType, inputs, calculation: calc,
+          customerUid: user?.uid,
+        })
+        setQuoteId(id)
       } catch {
         setSaveWarning(true)
       }
@@ -81,11 +90,36 @@ export default function QuoteCalculator() {
   }
 
   function handleScheduleVisit() {
-    navigate('/')
-    setTimeout(() => {
-      const el = document.getElementById('orcamento')
-      if (el) el.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
+    navigate('/agendar', {
+      state: {
+        clientName: client.name,
+        phone: client.phone,
+        city: client.city,
+        neighborhood: client.neighborhood,
+        serviceType,
+        quoteEstimateId: quoteId,
+      },
+    })
+  }
+
+  async function handleRequestAnalysis() {
+    if (!user) {
+      navigate('/criar-conta', { state: { from: '/orcamento', quoteId } })
+      return
+    }
+    if (!quoteId) {
+      navigate('/criar-conta')
+      return
+    }
+    setRequestingAnalysis(true)
+    try {
+      const leadId = await convertQuoteToLead(quoteId, 'pilar', user.uid)
+      navigate(`/cliente/solicitacoes/${leadId}`)
+    } catch {
+      navigate('/cliente/solicitacoes')
+    } finally {
+      setRequestingAnalysis(false)
+    }
   }
 
   return (
@@ -158,7 +192,10 @@ export default function QuoteCalculator() {
                 client={client}
                 calculation={calculation}
                 onScheduleVisit={handleScheduleVisit}
+                onRequestAnalysis={handleRequestAnalysis}
                 onRestart={handleRestart}
+                isLoggedIn={!!user}
+                isSavingAnalysis={requestingAnalysis}
               />
             </>
           )}

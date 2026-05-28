@@ -24,11 +24,13 @@ export interface Lead {
   internalNotes: string
   tenantId?: string
   customerUid?: string
+  quoteEstimateId?: string
+  appointmentId?: string
   createdAt: Timestamp
   updatedAt: Timestamp
 }
 
-export type LeadFormData = Omit<Lead, 'id' | 'source' | 'status' | 'internalNotes' | 'tenantId' | 'customerUid' | 'createdAt' | 'updatedAt'>
+export type LeadFormData = Omit<Lead, 'id' | 'source' | 'status' | 'internalNotes' | 'tenantId' | 'customerUid' | 'quoteEstimateId' | 'appointmentId' | 'createdAt' | 'updatedAt'>
 
 export const STATUS_LABELS: Record<LeadStatus, string> = {
   novo: 'Novo',

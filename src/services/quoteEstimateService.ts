@@ -1,5 +1,5 @@
 import {
-  collection, addDoc, doc, updateDoc,
+  collection, addDoc, doc, getDoc, updateDoc,
   query, orderBy, where, serverTimestamp, onSnapshot, type Unsubscribe,
 } from 'firebase/firestore'
 import { db } from './firebase'
@@ -55,4 +55,21 @@ export function subscribeCustomerQuotes(
 
 export async function updateQuoteStatus(id: string, status: QuoteStatus, tenantId = DEFAULT_TENANT): Promise<void> {
   await updateDoc(doc(db, `tenants/${tenantId}/quoteEstimates`, id), { status, updatedAt: serverTimestamp() })
+}
+
+export async function getQuoteEstimate(tenantId: string, quoteId: string): Promise<QuoteEstimate | null> {
+  const snap = await getDoc(doc(db, `tenants/${tenantId}/quoteEstimates`, quoteId))
+  if (!snap.exists()) return null
+  return { id: snap.id, ...snap.data() } as QuoteEstimate
+}
+
+export async function updateQuoteFields(
+  tenantId: string,
+  quoteId: string,
+  fields: Record<string, unknown>,
+): Promise<void> {
+  await updateDoc(doc(db, `tenants/${tenantId}/quoteEstimates`, quoteId), {
+    ...fields,
+    updatedAt: serverTimestamp(),
+  })
 }

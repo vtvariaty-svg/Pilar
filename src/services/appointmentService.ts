@@ -1,5 +1,5 @@
 import {
-  collection, addDoc, doc, updateDoc,
+  collection, addDoc, doc, getDoc, updateDoc,
   query, orderBy, where, serverTimestamp, onSnapshot, type Unsubscribe,
 } from 'firebase/firestore'
 import { db } from './firebase'
@@ -64,4 +64,10 @@ export async function updateAppointmentStatus(id: string, status: AppointmentSta
 
 export async function updateAppointmentNotes(id: string, internalNotes: string, tenantId = DEFAULT_TENANT): Promise<void> {
   await updateDoc(doc(db, `tenants/${tenantId}/appointments`, id), { internalNotes, updatedAt: serverTimestamp() })
+}
+
+export async function getAppointment(tenantId: string, appointmentId: string): Promise<Appointment | null> {
+  const snap = await getDoc(doc(db, `tenants/${tenantId}/appointments`, appointmentId))
+  if (!snap.exists()) return null
+  return { id: snap.id, ...snap.data() } as Appointment
 }

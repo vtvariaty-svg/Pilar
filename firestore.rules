@@ -45,7 +45,9 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin() || isPlatformAdmin());
-      allow create: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.globalRole == 'user'
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'phone', 'globalRole', 'createdAt', 'updatedAt']);
       allow update: if signedIn() && request.auth.uid == uid
         && request.resource.data.diff(resource.data).affectedKeys()
              .hasOnly(['name', 'phone', 'updatedAt']);
@@ -55,8 +57,15 @@ service cloud.firestore {
     match /adminUsers/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isSuperAdmin());
       allow create: if
-        (isBootstrapSuperAdmin() && request.auth.uid == uid && request.resource.data.role == 'super_admin')
-        || (isSuperAdmin() && request.resource.data.role in ['admin', 'super_admin']);
+        (isBootstrapSuperAdmin()
+          && request.auth.uid == uid
+          && request.resource.data.email == request.auth.token.email
+          && request.resource.data.role == 'super_admin'
+          && request.resource.data.active == true
+          && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'role', 'active', 'createdAt', 'updatedAt']))
+        || (isSuperAdmin()
+          && request.resource.data.role in ['admin', 'super_admin']
+          && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'role', 'active', 'createdBy', 'createdAt', 'updatedAt']));
       allow update: if isSuperAdmin();
       allow delete: if isSuperAdmin();
     }
@@ -108,7 +117,10 @@ service cloud.firestore {
         && request.resource.data.source == 'calculator';
       allow read: if isTenantStaff(tenantId) || isPlatformAdmin()
         || (signedIn() && resource.data.customerUid == request.auth.uid);
-      allow update: if isTenantStaff(tenantId) || isPlatformAdmin();
+      allow update: if isTenantStaff(tenantId) || isPlatformAdmin()
+        || (signedIn() && resource.data.customerUid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['leadId', 'appointmentId', 'status', 'updatedAt']));
       allow delete: if isTenantStaff(tenantId) || isPlatformAdmin();
     }
 
@@ -119,6 +131,29 @@ service cloud.firestore {
       allow read: if isTenantStaff(tenantId) || isPlatformAdmin()
         || (signedIn() && resource.data.customerUid == request.auth.uid);
       allow update: if isTenantStaff(tenantId) || isPlatformAdmin();
+      allow delete: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId}/leads/{leadId}/timeline/{eventId} {
+      allow read: if isTenantStaff(tenantId) || isPlatformAdmin()
+        || (signedIn()
+            && get(/databases/$(database)/documents/tenants/$(tenantId)/leads/$(leadId)).data.customerUid == request.auth.uid
+            && resource.data.visibility == 'customer');
+      allow create, update, delete: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
+    match /tenants/{tenantId}/proposals/{proposalId} {
+      allow read: if isTenantStaff(tenantId) || isPlatformAdmin()
+        || (signedIn() && resource.data.customerUid == request.auth.uid
+            && resource.data.status in ['enviada', 'aceita', 'recusada']);
+      allow create: if isTenantStaff(tenantId) || isPlatformAdmin();
+      allow update: if isTenantStaff(tenantId) || isPlatformAdmin()
+        || (signedIn()
+            && resource.data.customerUid == request.auth.uid
+            && resource.data.status == 'enviada'
+            && request.resource.data.status in ['aceita', 'recusada']
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['status', 'acceptedAt', 'rejectedAt', 'updatedAt']));
       allow delete: if isTenantStaff(tenantId) || isPlatformAdmin();
     }
 

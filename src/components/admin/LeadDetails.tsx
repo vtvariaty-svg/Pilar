@@ -11,7 +11,6 @@ import { whatsappLinkForLead } from '../../utils/whatsapp'
 interface LeadDetailsProps {
   lead: Lead
   onClose: () => void
-  onUpdated: () => void
 }
 
 export default function LeadDetails({ lead, onClose }: LeadDetailsProps) {

@@ -17,6 +17,8 @@ export interface Appointment {
   serviceType: string
   quoteEstimateId?: string
   leadId?: string
+  customerUid?: string
+  tenantId?: string
   date: string
   startTime: string
   endTime: string

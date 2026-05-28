@@ -101,7 +101,6 @@ export default function AdminDashboard() {
           <LeadDetails
             lead={selected}
             onClose={() => setSelected(null)}
-            onUpdated={() => setSelected(null)}
           />
         )}
       </AdminLayout>

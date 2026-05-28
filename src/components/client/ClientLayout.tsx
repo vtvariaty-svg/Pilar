@@ -1,12 +1,13 @@
 import { type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { HardHat, LayoutDashboard, FileText, Calculator, Calendar, User, LogOut } from 'lucide-react'
+import { HardHat, LayoutDashboard, FileText, Calculator, Calendar, User, LogOut, ClipboardList } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { env } from '../../utils/env'
 
 const navItems = [
   { to: '/cliente', label: 'Início', icon: LayoutDashboard },
   { to: '/cliente/solicitacoes', label: 'Solicitações', icon: FileText },
+  { to: '/cliente/propostas', label: 'Propostas', icon: ClipboardList },
   { to: '/cliente/orcamentos', label: 'Estimativas', icon: Calculator },
   { to: '/cliente/agendamentos', label: 'Agendamentos', icon: Calendar },
   { to: '/cliente/perfil', label: 'Perfil', icon: User },

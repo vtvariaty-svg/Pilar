@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { FileText } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { FileText, ChevronRight } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import CustomerRoute from '../../components/route/CustomerRoute'
 import { useAuth } from '../../contexts/AuthContext'
@@ -9,6 +10,7 @@ import { STATUS_LABELS, STATUS_COLORS } from '../../types/Lead'
 import type { Lead } from '../../types/Lead'
 
 export default function ClientLeadsPage() {
+  const navigate = useNavigate()
   const { user, currentTenantId } = useAuth()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,21 +45,28 @@ export default function ClientLeadsPage() {
         ) : (
           <div className="flex flex-col gap-3">
             {leads.map((l) => (
-              <div key={l.id} className="rounded-2xl border border-neutral-200 bg-white p-5">
+              <button
+                key={l.id}
+                onClick={() => navigate(`/cliente/solicitacoes/${l.id}`)}
+                className="w-full rounded-2xl border border-neutral-200 bg-white p-5 text-left transition hover:border-neutral-300 hover:shadow-sm"
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="font-semibold text-neutral-950">{l.serviceType}</p>
                     <p className="mt-0.5 text-sm text-neutral-500">{l.city}{l.neighborhood ? ` · ${l.neighborhood}` : ''}</p>
                     <p className="mt-2 text-xs text-neutral-400">Enviado em {formatDate(l.createdAt)}</p>
                   </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[l.status]}`}>
-                    {STATUS_LABELS[l.status]}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[l.status]}`}>
+                      {STATUS_LABELS[l.status]}
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-neutral-400" />
+                  </div>
                 </div>
                 {l.description && (
                   <p className="mt-3 rounded-xl bg-neutral-50 px-3 py-2 text-sm text-neutral-700">{l.description}</p>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         )}

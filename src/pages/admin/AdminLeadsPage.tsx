@@ -1,18 +1,18 @@
 ﻿import { useEffect, useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Users, TrendingUp } from 'lucide-react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import AdminRoute from '../../components/admin/AdminRoute'
 import LeadCard from '../../components/admin/LeadCard'
 import LeadFilters from '../../components/admin/LeadFilters'
-import LeadDetails from '../../components/admin/LeadDetails'
 import { subscribeLeads } from '../../services/leadsService'
 import type { Lead, LeadStatus } from '../../types/Lead'
 import { STATUS_LABELS } from '../../types/Lead'
 
 export default function AdminLeadsPage() {
+  const navigate = useNavigate()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState<Lead | null>(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<LeadStatus | 'todos'>('todos')
   const [serviceFilter, setServiceFilter] = useState('todos')
@@ -48,7 +48,7 @@ export default function AdminLeadsPage() {
         <div className="mb-6">
           <h1 className="text-xl font-black text-neutral-950">Pedidos</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            {leads.length} pedidos no total Â· {newCount} novos
+            {leads.length} pedidos no total · {newCount} novos
           </p>
         </div>
 
@@ -80,12 +80,12 @@ export default function AdminLeadsPage() {
           <div className="flex flex-col items-center justify-center rounded-3xl border border-neutral-200 bg-white py-16 text-center">
             <Users className="h-10 w-10 text-neutral-300" />
             <p className="mt-3 font-semibold text-neutral-500">Nenhum pedido encontrado</p>
-            <p className="mt-1 text-xs text-neutral-400">Tente outros filtros ou aguarde novas solicitaÃ§Ãµes.</p>
+            <p className="mt-1 text-xs text-neutral-400">Tente outros filtros ou aguarde novas solicitações.</p>
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((lead) => (
-              <LeadCard key={lead.id} lead={lead} onClick={() => setSelected(lead)} />
+              <LeadCard key={lead.id} lead={lead} onClick={() => navigate(`/admin/pedidos/${lead.id}`)} />
             ))}
           </div>
         )}
@@ -97,13 +97,6 @@ export default function AdminLeadsPage() {
           </p>
         )}
 
-        {selected && (
-          <LeadDetails
-            lead={selected}
-            onClose={() => setSelected(null)}
-            onUpdated={() => setSelected(null)}
-          />
-        )}
       </AdminLayout>
     </AdminRoute>
   )

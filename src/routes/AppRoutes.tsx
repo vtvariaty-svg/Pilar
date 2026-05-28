@@ -3,6 +3,7 @@ import Home from '../pages/Home'
 import QuoteCalculator from '../pages/QuoteCalculator'
 import SignIn from '../pages/SignIn'
 import SignUp from '../pages/SignUp'
+import ScheduleVisit from '../pages/ScheduleVisit'
 import AdminLogin from '../pages/AdminLogin'
 import AdminPortfolio from '../pages/AdminPortfolio'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
@@ -13,10 +14,15 @@ import AdminPricingPage from '../pages/admin/AdminPricingPage'
 import AdminServicesPage from '../pages/admin/AdminServicesPage'
 import AdminSettingsPage from '../pages/admin/AdminSettingsPage'
 import AdminCustomersPage from '../pages/admin/AdminCustomersPage'
+import AdminLeadDetailPage from '../pages/admin/AdminLeadDetailPage'
+import AdminProposalDetailPage from '../pages/admin/AdminProposalDetailPage'
 import AdminBootstrap from '../pages/admin/AdminBootstrap'
 import AdminUsersPage from '../pages/admin/AdminUsersPage'
 import ClientDashboard from '../pages/client/ClientDashboard'
 import ClientLeadsPage from '../pages/client/ClientLeadsPage'
+import ClientLeadDetailPage from '../pages/client/ClientLeadDetailPage'
+import ClientProposalsPage from '../pages/client/ClientProposalsPage'
+import ClientProposalDetailPage from '../pages/client/ClientProposalDetailPage'
 import ClientQuotesPage from '../pages/client/ClientQuotesPage'
 import ClientAppointmentsPage from '../pages/client/ClientAppointmentsPage'
 import ClientProfilePage from '../pages/client/ClientProfilePage'
@@ -35,6 +41,7 @@ export default function AppRoutes() {
         <Route path="/orcamento" element={<QuoteCalculator />} />
         <Route path="/entrar" element={<SignIn />} />
         <Route path="/criar-conta" element={<SignUp />} />
+        <Route path="/agendar" element={<ScheduleVisit />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/bootstrap" element={<AdminBootstrap />} />
 
@@ -42,6 +49,8 @@ export default function AppRoutes() {
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
         <Route path="/admin/pedidos" element={<AdminLeadsPage />} />
+        <Route path="/admin/pedidos/:leadId" element={<AdminLeadDetailPage />} />
+        <Route path="/admin/propostas/:proposalId" element={<AdminProposalDetailPage />} />
         <Route path="/admin/orcamentos" element={<AdminQuotesPage />} />
         <Route path="/admin/agendamentos" element={<AdminAppointmentsPage />} />
         <Route path="/admin/clientes" element={<AdminCustomersPage />} />
@@ -54,6 +63,9 @@ export default function AppRoutes() {
         {/* Client */}
         <Route path="/cliente" element={<ClientDashboard />} />
         <Route path="/cliente/solicitacoes" element={<ClientLeadsPage />} />
+        <Route path="/cliente/solicitacoes/:leadId" element={<ClientLeadDetailPage />} />
+        <Route path="/cliente/propostas" element={<ClientProposalsPage />} />
+        <Route path="/cliente/propostas/:proposalId" element={<ClientProposalDetailPage />} />
         <Route path="/cliente/orcamentos" element={<ClientQuotesPage />} />
         <Route path="/cliente/agendamentos" element={<ClientAppointmentsPage />} />
         <Route path="/cliente/perfil" element={<ClientProfilePage />} />
