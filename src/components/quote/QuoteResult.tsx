@@ -1,5 +1,5 @@
-import { CheckCircle2, Calendar, MessageCircle, AlertTriangle, ChevronDown, ChevronUp, ClipboardList } from 'lucide-react'
 import { useState } from 'react'
+import { ArrowRight, MessageCircle, Calendar, ChevronDown, ChevronUp } from 'lucide-react'
 import type { QuoteCalculation, QuoteClient, QuoteInputs } from '../../types/QuoteEstimate'
 import { formatCurrency } from '../../services/quoteCalculator'
 import { whatsappLink } from '../../utils/whatsapp'
@@ -17,154 +17,185 @@ interface QuoteResultProps {
   isSavingAnalysis?: boolean
 }
 
-const CONFIDENCE_LABELS = {
-  alta: { label: 'Alta confiança', color: 'text-green-700 bg-green-50 border-green-200' },
-  media: { label: 'Confiança média', color: 'text-yellow-700 bg-yellow-50 border-yellow-200' },
-  baixa: { label: 'Baixa confiança', color: 'text-red-700 bg-red-50 border-red-200' },
+const CONFIDENCE_CONFIG = {
+  alta: { label: 'Alta confiança', bar: 'w-4/5', color: 'text-green-400', bg: 'bg-green-400/10 border-green-500/20' },
+  media: { label: 'Confiança média', bar: 'w-3/5', color: 'text-brand-gold', bg: 'bg-brand-gold/10 border-brand-gold/20' },
+  baixa: { label: 'Confiança baixa', bar: 'w-2/5', color: 'text-red-400', bg: 'bg-red-900/20 border-red-700/20' },
+}
+
+const PROPERTY_LABELS: Record<string, string> = {
+  casa: 'Casa', apartamento: 'Apartamento', comercial: 'Imóvel comercial',
+  area_externa: 'Área externa', outro: 'Outro',
+}
+
+const CONDITION_LABELS: Record<string, string> = {
+  sem_acabamento: 'Novo / sem acabamento', bom_estado: 'Bom estado',
+  reforma_parcial: 'Reforma parcial', reforma_completa: 'Reforma completa', nao_sei: 'Não informado',
+}
+
+const FINISH_LABELS: Record<string, string> = {
+  economico: 'Econômico', intermediario: 'Intermediário', alto_padrao: 'Alto padrão',
 }
 
 export default function QuoteResult({ serviceType, inputs, client, calculation, onScheduleVisit, onRequestAnalysis, onRestart, isLoggedIn, isSavingAnalysis }: QuoteResultProps) {
   const [showDetails, setShowDetails] = useState(false)
 
-  const conf = CONFIDENCE_LABELS[calculation.confidence]
+  const conf = CONFIDENCE_CONFIG[calculation.confidence]
 
   const whatsappMessage = [
-    `Olá! Acabei de calcular uma estimativa no site da ${env.companyName}.`,
+    `Olá! Calculei uma estimativa no site da ${env.companyName}.`,
     ``,
     `*Serviço:* ${serviceType}`,
     inputs.areaM2 ? `*Área:* ${inputs.areaM2} m²` : '',
     `*Estimativa:* ${formatCurrency(calculation.estimatedLow)} – ${formatCurrency(calculation.estimatedHigh)}`,
     ``,
-    `*Meu contato:*`,
-    `Nome: ${client.name}`,
-    `Telefone: ${client.phone}`,
-    `Cidade: ${client.city}`,
-    client.neighborhood ? `Bairro: ${client.neighborhood}` : '',
+    `*Meu contato:* ${client.name} — ${client.phone}`,
+    `*Cidade:* ${client.city}${client.neighborhood ? `, ${client.neighborhood}` : ''}`,
     ``,
-    `Gostaria de conversar sobre um orçamento detalhado.`,
-  ]
-    .filter((l) => l !== undefined && l !== null && !(l === '' && false))
-    .join('\n')
+    `Gostaria de agendar uma visita técnica.`,
+  ].filter(Boolean).join('\n')
+
+  const dataSummary = [
+    { label: 'Serviço', value: serviceType },
+    inputs.propertyType ? { label: 'Imóvel', value: PROPERTY_LABELS[inputs.propertyType] ?? inputs.propertyType } : null,
+    inputs.currentCondition ? { label: 'Condição', value: CONDITION_LABELS[inputs.currentCondition] ?? inputs.currentCondition } : null,
+    inputs.areaM2 ? { label: 'Metragem', value: `${inputs.areaM2} m²` } : null,
+    { label: 'Acabamento', value: FINISH_LABELS[inputs.finishStandard] ?? inputs.finishStandard },
+    { label: 'Complexidade', value: inputs.complexity === 'baixa' ? 'Baixa' : inputs.complexity === 'media' ? 'Média' : 'Alta' },
+  ].filter(Boolean) as { label: string; value: string }[]
 
   return (
     <div>
-      <div className="mb-5 flex items-center gap-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100">
-          <CheckCircle2 className="h-5 w-5 text-green-600" />
-        </div>
-        <div>
-          <h2 className="text-xl font-black text-neutral-950">Sua estimativa está pronta</h2>
-          <p className="text-sm text-neutral-500">{serviceType}</p>
-        </div>
-      </div>
+      <p className="text-xs font-bold uppercase tracking-[0.15em] text-brand-gold mb-4">Prévia de estimativa</p>
+      <h2 className="font-serif text-2xl font-bold text-brand-offwhite mb-2">Estimativa inicial calculada.</h2>
+      <p className="text-sm text-brand-limestone/50 mb-8">
+        {client.name}, confira os valores abaixo. Esta é uma análise preliminar baseada nos dados informados.
+      </p>
 
-      {/* Range card */}
-      <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-400">Faixa estimada</p>
-        <div className="flex items-end gap-2">
-          <span className="text-3xl font-black text-neutral-950">{formatCurrency(calculation.estimatedMid)}</span>
-          <span className="mb-0.5 text-sm text-neutral-500">valor provável</span>
-        </div>
-        <div className="mt-2 flex items-center gap-2 text-sm text-neutral-600">
-          <span className="font-medium">Mínimo: {formatCurrency(calculation.estimatedLow)}</span>
-          <span className="text-neutral-300">|</span>
-          <span className="font-medium">Máximo: {formatCurrency(calculation.estimatedHigh)}</span>
-        </div>
-
-        <div className={`mt-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${conf.color}`}>
-          <span>{conf.label}</span>
-        </div>
-      </div>
-
-      {/* Breakdown toggle */}
-      <button
-        onClick={() => setShowDetails(!showDetails)}
-        className="mt-3 flex w-full items-center justify-between rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
-      >
-        <span>Ver fatores utilizados</span>
-        {showDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </button>
-
-      {showDetails && (
-        <div className="mt-2 rounded-xl border border-neutral-200 bg-white p-4 text-sm">
-          <div className="mb-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Base de cálculo</p>
-            <p className="mt-1 text-neutral-700">
-              {inputs.areaM2 ? `${inputs.areaM2} m² × valor base` : 'Valor mínimo do serviço'} = {formatCurrency(calculation.basePrice)}
-            </p>
+      {/* Faixa de valores */}
+      <div className="bg-brand-concrete border border-[#2a2a28] p-6 mb-4">
+        <p className="text-xs font-bold uppercase tracking-[0.15em] text-brand-limestone/40 mb-4">Faixa estimada</p>
+        <div className="grid grid-cols-3 gap-px bg-[#2a2a28]">
+          <div className="bg-brand-dark p-4 text-center">
+            <p className="text-xs text-brand-limestone/40 mb-1 uppercase tracking-wider">Mínimo</p>
+            <p className="font-serif text-lg font-bold text-brand-limestone">{formatCurrency(calculation.estimatedLow)}</p>
           </div>
-
-          {calculation.multipliers.length > 0 && (
-            <div className="mb-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Multiplicadores</p>
-              <ul className="mt-1 flex flex-col gap-1">
-                {calculation.multipliers.map((m) => (
-                  <li key={m.key} className="flex justify-between text-neutral-700">
-                    <span>{m.label}</span>
-                    <span className="font-medium">{m.value > 1 ? '+' : ''}{Math.round((m.value - 1) * 100)}%</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {calculation.additions.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Serviços adicionais</p>
-              <ul className="mt-1 flex flex-col gap-1">
-                {calculation.additions.map((a) => (
-                  <li key={a.key} className="flex justify-between text-neutral-700">
-                    <span>{a.label}</span>
-                    <span className="font-medium">+{formatCurrency(a.value)}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <div className="bg-[#111110] p-4 text-center border-x border-brand-gold/20">
+            <p className="text-xs text-brand-gold/60 mb-1 uppercase tracking-wider">Provável</p>
+            <p className="font-serif text-2xl font-bold text-brand-gold">{formatCurrency(calculation.estimatedMid)}</p>
+          </div>
+          <div className="bg-brand-dark p-4 text-center">
+            <p className="text-xs text-brand-limestone/40 mb-1 uppercase tracking-wider">Máximo</p>
+            <p className="font-serif text-lg font-bold text-brand-limestone">{formatCurrency(calculation.estimatedHigh)}</p>
+          </div>
         </div>
-      )}
+
+        {/* Confiança */}
+        <div className={`mt-4 flex items-center gap-3 border px-4 py-2.5 ${conf.bg}`}>
+          <div className="flex-1 h-1 bg-[#1e1e1c]">
+            <div className={`h-full ${conf.bar} bg-current ${conf.color} transition-all`} />
+          </div>
+          <span className={`text-xs font-bold uppercase tracking-wider ${conf.color}`}>{conf.label}</span>
+        </div>
+      </div>
+
+      {/* Dados considerados */}
+      <div className="mb-4">
+        <button
+          type="button"
+          onClick={() => setShowDetails(!showDetails)}
+          className="flex w-full items-center justify-between border border-[#2a2a28] bg-brand-concrete px-5 py-3.5 text-sm font-medium text-brand-limestone/60 transition hover:text-brand-limestone"
+        >
+          <span>Ver dados e fatores considerados</span>
+          {showDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
+
+        {showDetails && (
+          <div className="border border-t-0 border-[#2a2a28] bg-[#111110] p-5">
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              {dataSummary.map((d) => (
+                <div key={d.label}>
+                  <p className="text-xs text-brand-limestone/30 uppercase tracking-wider">{d.label}</p>
+                  <p className="text-sm font-medium text-brand-offwhite mt-0.5">{d.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {calculation.multipliers.length > 0 && (
+              <div className="border-t border-[#1e1e1c] pt-4 mb-4">
+                <p className="text-xs text-brand-limestone/30 uppercase tracking-wider mb-2">Multiplicadores aplicados</p>
+                {calculation.multipliers.map((m) => (
+                  <div key={m.key} className="flex justify-between text-sm text-brand-limestone/60 py-1">
+                    <span>{m.label}</span>
+                    <span className="font-medium text-brand-gold/60">{m.value > 1 ? '+' : ''}{Math.round((m.value - 1) * 100)}%</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {calculation.additions.length > 0 && (
+              <div className="border-t border-[#1e1e1c] pt-4">
+                <p className="text-xs text-brand-limestone/30 uppercase tracking-wider mb-2">Serviços adicionais</p>
+                {calculation.additions.map((a) => (
+                  <div key={a.key} className="flex justify-between text-sm text-brand-limestone/60 py-1">
+                    <span>{a.label}</span>
+                    <span className="font-medium text-brand-gold/60">+{formatCurrency(a.value)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Disclaimer */}
-      <div className="mt-4 flex gap-2 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
-        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-yellow-600" />
-        <p className="text-xs text-yellow-800">
-          Esta é uma <strong>estimativa inicial</strong>, não um orçamento formal. O valor real pode variar conforme visita técnica, condições do imóvel e especificações definitivas do projeto.
+      <div className="mb-6 border border-[#2a2a28] bg-brand-concrete px-5 py-4">
+        <p className="text-xs leading-5 text-brand-limestone/40">
+          <strong className="text-brand-limestone/60">Estimativa inicial.</strong>{' '}
+          Esta prévia não substitui visita técnica ou proposta formal. O valor real pode variar conforme condições do imóvel, especificações técnicas e preços de mercado no período de execução.
         </p>
       </div>
 
-      {/* CTAs */}
-      <div className="mt-6 flex flex-col gap-3">
+      {/* Próximos passos */}
+      <p className="text-xs font-bold uppercase tracking-[0.15em] text-brand-limestone/30 mb-3">Próximos passos</p>
+      <div className="flex flex-col gap-3">
         <button
+          type="button"
           onClick={onRequestAnalysis}
           disabled={isSavingAnalysis}
-          className="flex items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-neutral-800 disabled:opacity-60"
+          className="flex items-center justify-center gap-2 border border-brand-gold bg-brand-gold px-6 py-4 text-sm font-bold text-brand-dark transition hover:bg-[#c9a76a] disabled:opacity-60"
         >
           {isSavingAnalysis ? (
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            <span className="h-4 w-4 animate-spin border-2 border-brand-dark/30 border-t-brand-dark" />
           ) : (
-            <ClipboardList className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" />
           )}
-          {isLoggedIn ? 'Solicitar análise' : 'Solicitar análise (criar conta)'}
+          {isLoggedIn ? 'Solicitar análise técnica' : 'Solicitar análise (criar conta)'}
         </button>
+
         <button
+          type="button"
           onClick={onScheduleVisit}
-          className="flex items-center justify-center gap-2 rounded-xl border border-neutral-300 px-5 py-3.5 text-sm font-bold text-neutral-700 transition hover:bg-neutral-50"
+          className="flex items-center justify-center gap-2 border border-[#2a2a28] px-6 py-4 text-sm font-semibold text-brand-limestone/60 transition hover:border-brand-limestone/30 hover:text-brand-limestone"
         >
           <Calendar className="h-4 w-4" />
           Agendar visita técnica
         </button>
+
         <a
           href={whatsappLink(whatsappMessage)}
           target="_blank"
           rel="noreferrer"
-          className="flex items-center justify-center gap-2 rounded-xl border border-neutral-300 px-5 py-3.5 text-sm font-bold text-neutral-700 transition hover:bg-neutral-50"
+          className="flex items-center justify-center gap-2 border border-[#2a2a28] px-6 py-4 text-sm font-semibold text-brand-limestone/60 transition hover:border-green-600/30 hover:text-green-400"
         >
-          <MessageCircle className="h-4 w-4 text-green-600" />
+          <MessageCircle className="h-4 w-4 text-green-500" />
           Continuar pelo WhatsApp
         </a>
+
         <button
+          type="button"
           onClick={onRestart}
-          className="text-center text-xs text-neutral-400 underline hover:text-neutral-600"
+          className="text-center text-xs text-brand-limestone/25 hover:text-brand-limestone/50 transition pt-2"
         >
           Calcular nova estimativa
         </button>

@@ -1,10 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { HardHat, LogIn } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { env } from '../utils/env'
-import Button from '../components/ui/Button'
-import Input from '../components/ui/Input'
+import AuthLayout from '../components/auth/AuthLayout'
 
 export default function AdminLogin() {
   const { signIn, logout, user, loading, isAdminUser, isPlatformAdmin } = useAuth()
@@ -19,7 +16,7 @@ export default function AdminLogin() {
 
     if (isPlatformAdmin) {
       setSubmitting(false)
-      navigate('/platform', { replace: true })
+      navigate('/admin/sistema', { replace: true })
       return
     }
 
@@ -52,37 +49,73 @@ export default function AdminLogin() {
     }
   }
 
+  const inputClass = 'w-full border border-[#2a2a28] bg-[#111110] px-4 py-3 text-sm text-brand-offwhite placeholder-brand-limestone/30 outline-none focus:border-brand-gold/50 transition'
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-100 px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-950 text-white shadow-lg">
-            <HardHat className="h-7 w-7" />
-          </div>
-          <h1 className="mt-4 text-xl font-black text-neutral-950">{env.companyName}</h1>
-          <p className="mt-1 text-sm text-neutral-500">Painel administrativo</p>
+    <AuthLayout
+      title="Painel administrativo."
+      subtitle="Acesso restrito para gestão da operação Pilar."
+      mode="admin"
+      footer={
+        <div className="flex flex-col gap-2 text-center">
+          <Link
+            to="/"
+            className="text-xs text-brand-limestone/30 hover:text-brand-limestone/60 transition"
+          >
+            Voltar ao site
+          </Link>
+          <Link
+            to="/entrar"
+            className="text-xs text-brand-limestone/30 hover:text-brand-limestone/60 transition"
+          >
+            Área do cliente
+          </Link>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-brand-limestone/50">
+            E-mail administrativo
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="admin@pilar.com.br"
+            autoComplete="email"
+            className={inputClass}
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-3xl border border-neutral-200 bg-white p-7 shadow-xl">
-          <div className="flex flex-col gap-4">
-            <Input label="E-mail" type="email" placeholder="admin@email.com" value={email}
-              onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-            <Input label="Senha" type="password" placeholder="••••••••" value={password}
-              onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
-          </div>
+        <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-brand-limestone/50">
+            Senha
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            className={inputClass}
+          />
+        </div>
 
-          {error && <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>}
-
-          <Button type="submit" loading={submitting} size="lg" className="mt-5 w-full">
-            <LogIn className="h-4 w-4" />
-            Entrar
-          </Button>
-
-          <p className="mt-4 text-center text-xs text-neutral-500">
-            <Link to="/entrar" className="text-neutral-950 underline">Usar a página de login padrão</Link>
+        {error && (
+          <p className="border border-red-700/30 bg-red-900/20 px-4 py-3 text-xs text-red-400">
+            {error}
           </p>
-        </form>
-      </div>
-    </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className="mt-2 border border-brand-gold bg-brand-gold px-6 py-3.5 text-sm font-bold text-brand-dark transition hover:bg-[#c9a76a] disabled:opacity-50"
+        >
+          {submitting ? 'Verificando...' : 'Acessar painel'}
+        </button>
+      </form>
+    </AuthLayout>
   )
 }

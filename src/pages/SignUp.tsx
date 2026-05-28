@@ -1,12 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
-import { HardHat, UserPlus } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { db } from '../services/firebase'
-import { env } from '../utils/env'
-import Button from '../components/ui/Button'
-import Input from '../components/ui/Input'
+import AuthLayout from '../components/auth/AuthLayout'
 import { claimQuoteForCustomer } from '../services/quoteEstimateService'
 import { convertQuoteToLead } from '../services/commercialFlowService'
 
@@ -16,15 +13,19 @@ interface LocationState {
 }
 
 export default function SignUp() {
-  const { signUp, user } = useAuth()
+  const { signUp, user, loading, isAdminUser } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const state = (location.state as LocationState) ?? {}
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' })
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  if (user) { navigate('/cliente', { replace: true }); return null }
+  useEffect(() => {
+    if (loading || !user) return
+    if (isAdminUser) { navigate('/admin/dashboard', { replace: true }); return }
+    navigate('/cliente', { replace: true })
+  }, [loading, user, isAdminUser, navigate])
 
   function set(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -38,11 +39,10 @@ export default function SignUp() {
     if (!form.phone.trim()) { setError('Telefone é obrigatório.'); return }
     if (form.password.length < 6) { setError('Senha deve ter ao menos 6 caracteres.'); return }
     if (form.password !== form.confirm) { setError('As senhas não conferem.'); return }
-    setLoading(true)
+    setSubmitting(true)
     try {
       const uid = await signUp(form.email, form.password, { name: form.name, phone: form.phone })
 
-      // Verificar se conta foi criada como admin (via convite)
       const adminSnap = await getDoc(doc(db, 'adminUsers', uid))
       if (adminSnap.exists() && adminSnap.data().active === true) {
         navigate('/admin/dashboard', { replace: true })
@@ -64,50 +64,99 @@ export default function SignUp() {
       const msg = err instanceof Error ? err.message : ''
       if (msg.includes('email-already-in-use')) setError('Este e-mail já está em uso.')
       else setError('Erro ao criar conta. Tente novamente.')
-      setLoading(false)
+      setSubmitting(false)
     }
   }
 
+  const inputClass = 'w-full border border-[#2a2a28] bg-[#111110] px-4 py-3 text-sm text-brand-offwhite placeholder-brand-limestone/30 outline-none focus:border-brand-gold/50 transition'
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-100 px-4 py-8">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <Link to="/" className="flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-950 text-white shadow-lg">
-            <HardHat className="h-7 w-7" />
+    <AuthLayout
+      title="Crie sua área do cliente."
+      subtitle="Acompanhe estimativas, visitas, propostas e solicitações em um só lugar."
+      mode="client"
+      footer={
+        <p className="text-center text-xs text-brand-limestone/40">
+          Já tem conta?{' '}
+          <Link to="/entrar" className="text-brand-gold hover:text-brand-limestone transition">
+            Entrar
           </Link>
-          <h1 className="mt-4 text-xl font-black text-neutral-950">{env.companyName}</h1>
-          <p className="mt-1 text-sm text-neutral-500">Crie sua conta e acompanhe seus pedidos</p>
+        </p>
+      }
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-brand-limestone/50">Nome completo</label>
+          <input
+            value={form.name}
+            onChange={(e) => set('name', e.target.value)}
+            placeholder="Seu nome"
+            autoComplete="name"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-brand-limestone/50">E-mail</label>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(e) => set('email', e.target.value)}
+            placeholder="seu@email.com"
+            autoComplete="email"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-brand-limestone/50">WhatsApp</label>
+          <input
+            value={form.phone}
+            onChange={(e) => set('phone', e.target.value)}
+            placeholder="(00) 00000-0000"
+            autoComplete="tel"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-brand-limestone/50">Senha</label>
+          <input
+            type="password"
+            value={form.password}
+            onChange={(e) => set('password', e.target.value)}
+            placeholder="Mínimo 6 caracteres"
+            autoComplete="new-password"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-brand-limestone/50">Confirmar senha</label>
+          <input
+            type="password"
+            value={form.confirm}
+            onChange={(e) => set('confirm', e.target.value)}
+            placeholder="Repita a senha"
+            autoComplete="new-password"
+            className={inputClass}
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-3xl border border-neutral-200 bg-white p-7 shadow-xl">
-          <div className="flex flex-col gap-4">
-            <Input label="Nome completo *" placeholder="Seu nome" value={form.name}
-              onChange={(e) => set('name', e.target.value)} autoComplete="name" />
-            <Input label="E-mail *" type="email" placeholder="seu@email.com" value={form.email}
-              onChange={(e) => set('email', e.target.value)} autoComplete="email" />
-            <Input label="Telefone / WhatsApp *" placeholder="(00) 00000-0000" value={form.phone}
-              onChange={(e) => set('phone', e.target.value)} autoComplete="tel" />
-            <Input label="Senha *" type="password" placeholder="Mínimo 6 caracteres" value={form.password}
-              onChange={(e) => set('password', e.target.value)} autoComplete="new-password" />
-            <Input label="Confirmar senha *" type="password" placeholder="Repita a senha" value={form.confirm}
-              onChange={(e) => set('confirm', e.target.value)} autoComplete="new-password" />
-          </div>
-
-          {error && <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>}
-
-          <Button type="submit" loading={loading} size="lg" className="mt-5 w-full">
-            <UserPlus className="h-4 w-4" />
-            Criar conta
-          </Button>
-
-          <p className="mt-4 text-center text-xs text-neutral-500">
-            Já tem conta?{' '}
-            <Link to="/entrar" className="font-semibold text-neutral-950 underline">
-              Entrar
-            </Link>
+        {error && (
+          <p className="border border-red-700/30 bg-red-900/20 px-4 py-3 text-xs text-red-400">
+            {error}
           </p>
-        </form>
-      </div>
-    </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className="mt-2 border border-brand-gold bg-brand-gold px-6 py-3.5 text-sm font-bold text-brand-dark transition hover:bg-[#c9a76a] disabled:opacity-50"
+        >
+          {submitting ? 'Criando conta...' : 'Criar conta gratuita'}
+        </button>
+
+        <p className="text-center text-xs text-brand-limestone/30">
+          Você poderá acompanhar suas solicitações e propostas na área do cliente.
+        </p>
+      </form>
+    </AuthLayout>
   )
 }

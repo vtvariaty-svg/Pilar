@@ -42,6 +42,7 @@ export interface QuoteInputs {
   areaM2: number
   propertyType: string
   currentCondition: string
+  rooms: string[]
   finishStandard: 'economico' | 'intermediario' | 'alto_padrao'
   complexity: 'baixa' | 'media' | 'alta'
   timeline: 'normal' | 'urgente'

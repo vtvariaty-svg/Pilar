@@ -6,13 +6,21 @@ export function getDefaultSettings(serviceType: string): PricingSettings {
   return DEFAULT_PRICING.find((s) => s.serviceType === serviceType) ?? DEFAULT_PRICING[1]
 }
 
+const CONDITION_MULTIPLIERS: Record<string, number> = {
+  'bom_estado': 1.0,
+  'reforma_parcial': 1.05,
+  'reforma_completa': 1.10,
+  'sem_acabamento': 1.08,
+  'nao_sei': 1.0,
+}
+
 export function calculateQuoteEstimate(
   inputs: QuoteInputs,
   serviceType: string,
   settings: PricingSettings,
 ): QuoteCalculation {
   const {
-    areaM2, finishStandard, complexity, timeline,
+    areaM2, finishStandard, complexity, timeline, currentCondition,
     includesDemolition, includesElectrical, includesPlumbing,
     includesPainting, includesFlooring,
   } = inputs
@@ -44,6 +52,15 @@ export function calculateQuoteEstimate(
     multipliers.push({ key: 'urgency', label: 'Urgência', value: urgencyMult })
   }
 
+  const condMult = CONDITION_MULTIPLIERS[currentCondition] ?? 1.0
+  if (condMult !== 1.0) {
+    const condLabel =
+      currentCondition === 'reforma_parcial' ? 'Condição: reforma parcial' :
+      currentCondition === 'reforma_completa' ? 'Condição: reforma completa' :
+      currentCondition === 'sem_acabamento' ? 'Condição: sem acabamento' : 'Condição do imóvel'
+    multipliers.push({ key: 'condition', label: condLabel, value: condMult })
+  }
+
   const totalMultiplier = multipliers.reduce((acc, m) => acc * m.value, 1)
   const multipliedPrice = basePrice * totalMultiplier
 
@@ -62,7 +79,7 @@ export function calculateQuoteEstimate(
   const estimatedHigh = Math.round(estimatedMid * (1 + unc))
 
   let confidence: 'baixa' | 'media' | 'alta' = 'media'
-  if (areaM2 > 300 || complexity === 'alta' || serviceType === 'Outro') confidence = 'baixa'
+  if (areaM2 > 300 || complexity === 'alta' || serviceType === 'Outro' || currentCondition === 'nao_sei') confidence = 'baixa'
   else if (areaM2 >= 20 && complexity === 'baixa') confidence = 'alta'
 
   return { basePrice, additions, multipliers, estimatedLow, estimatedMid, estimatedHigh, confidence }
