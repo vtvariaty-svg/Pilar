@@ -14,6 +14,7 @@ import {
 import { db } from './firebase'
 import type { Proposal, ProposalItem, ProposalStatus } from '../types/Proposal'
 import { createTimelineEvent } from './commercialFlowService'
+import { createTaskIfNotExists, daysFromNow } from './taskService'
 
 export interface ProposalFormData {
   leadId: string
@@ -87,6 +88,23 @@ export async function sendProposal(
     visibility: 'customer',
     createdBy,
   })
+  try {
+    await createTaskIfNotExists(
+      tenantId,
+      `proposal:${proposalId}:follow_up_proposal`,
+      {
+        type: 'follow_up_proposal',
+        title: 'Fazer follow-up da proposta',
+        priority: 'medium',
+        dueAt: daysFromNow(2),
+        leadId,
+        proposalId,
+      },
+      createdBy,
+    )
+  } catch (err) {
+    console.warn('[sendProposal] task creation failed:', err)
+  }
 }
 
 export async function acceptProposal(
@@ -106,6 +124,23 @@ export async function acceptProposal(
     visibility: 'customer',
     createdBy,
   })
+  try {
+    await createTaskIfNotExists(
+      tenantId,
+      `proposal:${proposalId}:start_project`,
+      {
+        type: 'start_project',
+        title: 'Iniciar planejamento da execução',
+        priority: 'high',
+        dueAt: daysFromNow(1),
+        leadId,
+        proposalId,
+      },
+      createdBy,
+    )
+  } catch (err) {
+    console.warn('[acceptProposal] task creation failed:', err)
+  }
 }
 
 export async function rejectProposal(

@@ -17,6 +17,7 @@ import { STATUS_LABELS } from '../types/Lead'
 import { createLead } from './leadsService'
 import { getQuoteEstimate } from './quoteEstimateService'
 import { createAppointment, type AppointmentFormData } from './appointmentService'
+import { createTaskIfNotExists, hoursFromNow, daysFromNow } from './taskService'
 
 const DEFAULT_TENANT = 'pilar'
 
@@ -115,6 +116,24 @@ export async function convertQuoteToLead(
     console.warn('[convertQuoteToLead] timeline creation failed:', err)
   }
 
+  try {
+    await createTaskIfNotExists(
+      tenantId,
+      `lead:${leadId}:contact_new_lead`,
+      {
+        type: 'contact_new_lead',
+        title: 'Responder novo pedido',
+        priority: 'high',
+        dueAt: daysFromNow(1),
+        leadId,
+        quoteEstimateId: quoteId,
+        customerUid: uid,
+      },
+    )
+  } catch (err) {
+    console.warn('[convertQuoteToLead] task creation failed:', err)
+  }
+
   return leadId
 }
 
@@ -153,6 +172,24 @@ export async function requestVisitFromQuote(
       })
     } catch (err) {
       console.warn('[requestVisitFromQuote] timeline creation failed:', err)
+    }
+
+    try {
+      await createTaskIfNotExists(
+        tenantId,
+        `appointment:${appointmentId}:confirm_appointment`,
+        {
+          type: 'confirm_appointment',
+          title: 'Confirmar visita técnica',
+          priority: 'high',
+          dueAt: hoursFromNow(24),
+          leadId: appointmentData.leadId,
+          appointmentId,
+          customerUid: appointmentData.customerUid,
+        },
+      )
+    } catch (err) {
+      console.warn('[requestVisitFromQuote] task creation failed:', err)
     }
   }
 

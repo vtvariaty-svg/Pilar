@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { HardHat, LayoutDashboard, Image, LogOut, Users, Calculator, Calendar, Settings, Layers, SlidersHorizontal, ShieldCheck } from 'lucide-react'
+import { HardHat, LayoutDashboard, Image, LogOut, Users, Calculator, Calendar, Settings, Layers, SlidersHorizontal, ShieldCheck, CheckSquare } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { env } from '../../utils/env'
 
@@ -10,6 +10,7 @@ interface AdminLayoutProps {
 
 const baseNavItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/tarefas', label: 'Tarefas', icon: CheckSquare },
   { to: '/admin/pedidos', label: 'Pedidos', icon: Users },
   { to: '/admin/orcamentos', label: 'Estimativas', icon: Calculator },
   { to: '/admin/agendamentos', label: 'Agendamentos', icon: Calendar },

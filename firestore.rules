@@ -164,6 +164,10 @@ service cloud.firestore {
       allow delete: if isTenantStaff(tenantId) || isPlatformAdmin();
     }
 
+    match /tenants/{tenantId}/tasks/{taskId} {
+      allow read, create, update, delete: if isTenantStaff(tenantId) || isPlatformAdmin();
+    }
+
     match /tenants/{tenantId}/pricingSettings/{id} {
       allow read: if true;
       allow write: if isTenantStaff(tenantId) || isPlatformAdmin();

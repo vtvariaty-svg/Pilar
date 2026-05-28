@@ -18,6 +18,7 @@ import AdminLeadDetailPage from '../pages/admin/AdminLeadDetailPage'
 import AdminProposalDetailPage from '../pages/admin/AdminProposalDetailPage'
 import AdminBootstrap from '../pages/admin/AdminBootstrap'
 import AdminUsersPage from '../pages/admin/AdminUsersPage'
+import AdminTasksPage from '../pages/admin/AdminTasksPage'
 import ClientDashboard from '../pages/client/ClientDashboard'
 import ClientLeadsPage from '../pages/client/ClientLeadsPage'
 import ClientLeadDetailPage from '../pages/client/ClientLeadDetailPage'
@@ -59,6 +60,7 @@ export default function AppRoutes() {
         <Route path="/admin/portfolio" element={<AdminPortfolio />} />
         <Route path="/admin/configuracoes" element={<AdminSettingsPage />} />
         <Route path="/admin/usuarios" element={<AdminUsersPage />} />
+        <Route path="/admin/tarefas" element={<AdminTasksPage />} />
 
         {/* Client */}
         <Route path="/cliente" element={<ClientDashboard />} />

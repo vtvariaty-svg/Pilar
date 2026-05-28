@@ -30,6 +30,17 @@ import {
   sendProposal,
   type ProposalFormData,
 } from '../../services/proposalService'
+import { subscribeTasksByLead, completeTask, createTask } from '../../services/taskService'
+import TaskForm, { type TaskFormValues } from '../../components/admin/tasks/TaskForm'
+import {
+  TASK_TYPE_LABELS,
+  TASK_STATUS_LABELS,
+  TASK_PRIORITY_LABELS,
+  TASK_PRIORITY_COLORS,
+  TASK_STATUS_COLORS,
+  type Task,
+} from '../../types/Task'
+import { Timestamp } from 'firebase/firestore'
 import { formatDate, formatDateShort } from '../../utils/formatDate'
 import { whatsappLinkForLead } from '../../utils/whatsapp'
 import { formatCurrency } from '../../services/quoteCalculator'
@@ -72,6 +83,9 @@ export default function AdminLeadDetailPage() {
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [showTaskForm, setShowTaskForm] = useState(false)
+  const [completingTask, setCompletingTask] = useState<string | null>(null)
   const [notes, setNotes] = useState('')
   const [savingNotes, setSavingNotes] = useState(false)
   const [notesSaved, setNotesSaved] = useState(false)
@@ -110,6 +124,12 @@ export default function AdminLeadDetailPage() {
   useEffect(() => {
     if (!leadId) return
     const unsub = subscribeLeadProposals(TENANT, leadId, setProposals)
+    return unsub
+  }, [leadId])
+
+  useEffect(() => {
+    if (!leadId) return
+    const unsub = subscribeTasksByLead(TENANT, leadId, setTasks)
     return unsub
   }, [leadId])
 
@@ -161,6 +181,40 @@ export default function AdminLeadDetailPage() {
     } finally {
       setSavingNotes(false)
     }
+  }
+
+  async function handleCompleteTask(task: Task) {
+    setCompletingTask(task.id)
+    try {
+      await completeTask(TENANT, task.id)
+      if (leadId) {
+        await createTimelineEvent(TENANT, leadId, {
+          type: 'note_added',
+          title: 'Tarefa concluída',
+          description: task.title,
+          visibility: 'internal',
+          createdBy: user?.uid,
+        })
+      }
+    } finally {
+      setCompletingTask(null)
+    }
+  }
+
+  async function handleCreateTask(data: TaskFormValues) {
+    if (!leadId) return
+    const dueAt = data.dueAt ? Timestamp.fromDate(new Date(data.dueAt)) : undefined
+    await createTask(TENANT, {
+      type: data.type,
+      title: data.title,
+      description: data.description,
+      priority: data.priority,
+      status: data.status,
+      leadId,
+      customerUid: lead?.customerUid,
+      ...(dueAt ? { dueAt } : {}),
+    }, user?.uid)
+    setShowTaskForm(false)
   }
 
   async function handleCreateProposal(data: ProposalFormData) {
@@ -393,6 +447,73 @@ export default function AdminLeadDetailPage() {
                           >
                             <FileText className="h-3.5 w-3.5" />
                             Enviar ao cliente
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Tarefas */}
+            <section className="rounded-2xl border border-neutral-200 bg-white p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Tarefas</h2>
+                {!showTaskForm && (
+                  <button
+                    onClick={() => setShowTaskForm(true)}
+                    className="flex items-center gap-1 text-xs font-medium text-neutral-700 hover:text-neutral-950"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Nova tarefa
+                  </button>
+                )}
+              </div>
+
+              {showTaskForm && (
+                <div className="mb-4">
+                  <TaskForm
+                    leadId={leadId}
+                    onSubmit={handleCreateTask}
+                    onCancel={() => setShowTaskForm(false)}
+                  />
+                </div>
+              )}
+
+              {!showTaskForm && tasks.length === 0 && (
+                <p className="text-sm text-neutral-400">Nenhuma tarefa para este pedido.</p>
+              )}
+
+              {tasks.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  {tasks.map((task) => (
+                    <div key={task.id} className="rounded-xl border border-neutral-100 bg-neutral-50 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${TASK_PRIORITY_COLORS[task.priority]}`}>
+                              {TASK_PRIORITY_LABELS[task.priority]}
+                            </span>
+                            <span className="text-xs text-neutral-400">{TASK_TYPE_LABELS[task.type]}</span>
+                          </div>
+                          <p className="mt-1 text-sm font-semibold text-neutral-900">{task.title}</p>
+                          {task.dueAt && (
+                            <p className="mt-0.5 text-xs text-neutral-400">
+                              Prazo: {formatDateShort(task.dueAt)}
+                            </p>
+                          )}
+                          <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${TASK_STATUS_COLORS[task.status]}`}>
+                            {TASK_STATUS_LABELS[task.status]}
+                          </span>
+                        </div>
+                        {(task.status === 'open' || task.status === 'in_progress') && (
+                          <button
+                            onClick={() => handleCompleteTask(task)}
+                            disabled={completingTask === task.id}
+                            className="shrink-0 rounded-xl bg-green-50 px-2.5 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-100 disabled:opacity-60"
+                          >
+                            Concluir
                           </button>
                         )}
                       </div>
