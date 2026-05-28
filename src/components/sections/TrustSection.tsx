@@ -1,36 +1,34 @@
-import { ShieldCheck, CheckCircle2 } from 'lucide-react'
+import SectionHeader from '../public/SectionHeader'
 
-const trustItems = [
-  'Fotos reais de obras executadas',
-  'Atendimento direto pelo WhatsApp',
-  'Proposta clara por etapa',
-  'Cronograma de execução',
-  'Contrato para obras maiores',
-  'Equipe experiente e local',
+const pillars = [
+  { num: '01', title: 'Contrato claro', desc: 'Escopo, prazo e valores definidos antes do início. Sem surpresas no meio da obra.' },
+  { num: '02', title: 'Cronograma real', desc: 'Planejamento honesto, com datas revisadas sempre que necessário e comunicadas com antecedência.' },
+  { num: '03', title: 'Equipe experiente', desc: 'Profissionais com anos de atuação em obras residenciais, selecionados pelo histórico técnico.' },
+  { num: '04', title: 'Comunicação constante', desc: 'Relatórios fotográficos, atualização de etapas e acesso à área do cliente durante toda a obra.' },
+  { num: '05', title: 'Visita técnica', desc: 'Diagnóstico presencial antes da proposta. Não cotamos obras que não visitamos.' },
+  { num: '06', title: 'Proposta formal', desc: 'Documento detalhado com discriminação de serviços, materiais, responsabilidades e condições.' },
+  { num: '07', title: 'Acabamento cuidadoso', desc: 'O acabamento define o padrão da entrega. Nossa equipe trata cada detalhe com atenção técnica.' },
+  { num: '08', title: 'Pós-obra', desc: 'Suporte para dúvidas e ajustes após a entrega. A relação não termina com as chaves.' },
 ]
 
 export default function TrustSection() {
   return (
-    <section className="bg-neutral-950 py-16 text-white">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium">
-            <ShieldCheck className="h-4 w-4" />
-            Confiança vende obra
-          </div>
-          <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">
-            Seu cliente não quer só preço. Ele quer reduzir risco.
-          </h2>
-          <p className="mt-4 text-base leading-7 text-neutral-300">
-            Por isso, nosso atendimento transmite organização: escopo, prazos, etapas, registro da obra, proposta formal e comunicação clara do início ao fim.
-          </p>
-        </div>
+    <section className="bg-[#111110] py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionHeader
+          eyebrow="Por que a Pilar"
+          title="O que diferencia uma obra profissional."
+          subtitle="Não trabalhamos com promessas. Trabalhamos com processo, método e responsabilidade técnica."
+          light
+          centered
+        />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {trustItems.map((item) => (
-            <div key={item} className="flex items-start gap-3 rounded-3xl border border-white/10 bg-white/5 p-5">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
-              <p className="text-sm font-medium leading-6 text-neutral-100">{item}</p>
+        <div className="mt-16 grid gap-px bg-[#2a2a28] sm:grid-cols-2 lg:grid-cols-4">
+          {pillars.map((p) => (
+            <div key={p.num} className="bg-brand-concrete p-8">
+              <p className="font-serif text-4xl font-bold leading-none text-brand-gold/20">{p.num}</p>
+              <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-brand-offwhite">{p.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-brand-limestone/60">{p.desc}</p>
             </div>
           ))}
         </div>

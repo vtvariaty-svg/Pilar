@@ -1,5 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Home from '../pages/Home'
+import AboutPage from '../pages/public/AboutPage'
+import ServicesPage from '../pages/public/ServicesPage'
+import ServiceDetailPage from '../pages/public/ServiceDetailPage'
+import ProjectsPage from '../pages/public/ProjectsPage'
+import ProjectDetailPage from '../pages/public/ProjectDetailPage'
+import MethodPage from '../pages/public/MethodPage'
+import ContactPage from '../pages/public/ContactPage'
 import QuoteCalculator from '../pages/QuoteCalculator'
 import SignIn from '../pages/SignIn'
 import SignUp from '../pages/SignUp'
@@ -37,6 +44,13 @@ export default function AppRoutes() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<Home />} />
+        <Route path="/sobre" element={<AboutPage />} />
+        <Route path="/servicos" element={<ServicesPage />} />
+        <Route path="/servicos/:slug" element={<ServiceDetailPage />} />
+        <Route path="/obras" element={<ProjectsPage />} />
+        <Route path="/obras/:slug" element={<ProjectDetailPage />} />
+        <Route path="/metodo" element={<MethodPage />} />
+        <Route path="/contato" element={<ContactPage />} />
         <Route path="/orcamento" element={<QuoteCalculator />} />
         <Route path="/entrar" element={<SignIn />} />
         <Route path="/criar-conta" element={<SignUp />} />

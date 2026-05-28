@@ -1,46 +1,85 @@
-import { MapPin, Phone, Clock, ClipboardCheck } from 'lucide-react'
+import { MapPin, Clock, MessageCircle, Camera } from 'lucide-react'
 import { env } from '../../utils/env'
+import { whatsappLink } from '../../utils/whatsapp'
 import QuoteForm from '../forms/QuoteForm'
 
 export default function ContactSection() {
   return (
-    <section id="orcamento" className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
-      <div className="rounded-[2rem] bg-neutral-950 p-8 text-white shadow-2xl lg:p-10">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium">
-          <ClipboardCheck className="h-4 w-4" />
-          Pedido de orçamento
-        </div>
-        <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">
-          Peça uma análise para sua obra ou reforma
-        </h2>
-        <p className="mt-4 text-base leading-7 text-neutral-300">
-          Preencha os dados principais. Quanto mais detalhes, melhor será a avaliação inicial. Você receberá contato em até 24h úteis.
-        </p>
+    <section id="contato" className="bg-brand-offwhite py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-16 lg:grid-cols-[1fr_1.4fr]">
+          {/* Info */}
+          <div>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
+              Contato
+            </p>
+            <h2 className="font-serif text-3xl font-bold leading-tight text-brand-dark sm:text-4xl">
+              Vamos conversar sobre a sua obra.
+            </h2>
+            <p className="mt-5 text-base leading-7 text-neutral-600">
+              Descreva o que você precisa ou envie fotos do imóvel. Nossa equipe analisa e retorna com orientações dentro de 24 horas.
+            </p>
 
-        <div className="mt-8 space-y-4 text-sm text-neutral-200">
-          <div className="flex items-center gap-3">
-            <MapPin className="h-5 w-5 shrink-0" />
-            <span>Atendimento em {env.serviceRegion}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Phone className="h-5 w-5 shrink-0" />
-            <span>WhatsApp disponível</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Clock className="h-5 w-5 shrink-0" />
-            <span>Análise inicial em até 24h úteis</span>
-          </div>
-        </div>
+            <div className="mt-10 space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-brand-gold/30 bg-brand-dark">
+                  <MapPin className="h-4 w-4 text-brand-gold" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-brand-dark">Região de atendimento</p>
+                  <p className="mt-1 text-sm text-neutral-600">{env.serviceRegion}</p>
+                </div>
+              </div>
 
-        <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5">
-          <p className="text-sm font-semibold">Este formulário não gera orçamento automático.</p>
-          <p className="mt-2 text-xs leading-5 text-neutral-400">
-            A proposta depende de análise técnica, escopo, localização, materiais e disponibilidade da equipe. Após o envio, entraremos em contato.
-          </p>
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-brand-gold/30 bg-brand-dark">
+                  <Clock className="h-4 w-4 text-brand-gold" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-brand-dark">Horário de atendimento</p>
+                  <p className="mt-1 text-sm text-neutral-600">Segunda a sexta, das 8h às 18h</p>
+                  <p className="text-sm text-neutral-500">Sábados mediante agendamento</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-brand-gold/30 bg-brand-dark">
+                  <MessageCircle className="h-4 w-4 text-brand-gold" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-brand-dark">WhatsApp</p>
+                  <a
+                    href={whatsappLink('Olá, gostaria de solicitar uma análise da minha obra.')}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-block text-sm text-brand-gold underline underline-offset-4 hover:text-brand-dark"
+                  >
+                    Iniciar conversa
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-brand-gold/30 bg-brand-dark">
+                  <Camera className="h-4 w-4 text-brand-gold" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-brand-dark">Enviar fotos pelo WhatsApp</p>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    Fotos do imóvel aceleram o diagnóstico e permitem uma estimativa mais precisa antes da visita técnica.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div className="border border-neutral-200 bg-white p-8 shadow-sm">
+            <p className="mb-6 text-sm font-bold text-brand-dark">Solicitar análise ou orçamento</p>
+            <QuoteForm />
+          </div>
         </div>
       </div>
-
-      <QuoteForm />
     </section>
   )
 }
