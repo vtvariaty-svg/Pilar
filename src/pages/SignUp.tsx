@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
+import { doc, getDoc } from 'firebase/firestore'
 import { HardHat, UserPlus } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { db } from '../services/firebase'
 import { env } from '../utils/env'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -39,6 +41,13 @@ export default function SignUp() {
     setLoading(true)
     try {
       const uid = await signUp(form.email, form.password, { name: form.name, phone: form.phone })
+
+      // Verificar se conta foi criada como admin (via convite)
+      const adminSnap = await getDoc(doc(db, 'adminUsers', uid))
+      if (adminSnap.exists() && adminSnap.data().active === true) {
+        navigate('/admin/dashboard', { replace: true })
+        return
+      }
 
       if (state.quoteId) {
         try {

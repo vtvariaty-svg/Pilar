@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { HardHat, LayoutDashboard, Image, LogOut, Users, Calculator, Calendar, Settings, Layers, SlidersHorizontal, ShieldCheck, CheckSquare } from 'lucide-react'
+import { HardHat, LayoutDashboard, Image, LogOut, Users, Calculator, Calendar, Settings, Layers, SlidersHorizontal, ShieldCheck, CheckSquare, Building2, Cpu } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { env } from '../../utils/env'
 
@@ -15,14 +15,16 @@ const baseNavItems = [
   { to: '/admin/orcamentos', label: 'Estimativas', icon: Calculator },
   { to: '/admin/agendamentos', label: 'Agendamentos', icon: Calendar },
   { to: '/admin/clientes', label: 'Clientes', icon: Users },
-  { to: '/admin/parametros', label: 'Parâmetros', icon: SlidersHorizontal },
-  { to: '/admin/servicos', label: 'Serviços', icon: Layers },
-  { to: '/admin/portfolio', label: 'Portfólio', icon: Image },
-  { to: '/admin/configuracoes', label: 'Configurações', icon: Settings },
+  { to: '/admin/parametros', label: 'Parametros', icon: SlidersHorizontal },
+  { to: '/admin/servicos', label: 'Servicos', icon: Layers },
+  { to: '/admin/portfolio', label: 'Portfolio', icon: Image },
+  { to: '/admin/configuracoes', label: 'Configuracoes', icon: Settings },
 ]
 
 const superAdminNavItems = [
-  { to: '/admin/usuarios', label: 'Usuários Admin', icon: ShieldCheck },
+  { to: '/admin/usuarios', label: 'Usuarios', icon: ShieldCheck },
+  { to: '/admin/tenants', label: 'Empresas', icon: Building2 },
+  { to: '/admin/sistema', label: 'Sistema', icon: Cpu },
 ]
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

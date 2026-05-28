@@ -19,6 +19,8 @@ import AdminProposalDetailPage from '../pages/admin/AdminProposalDetailPage'
 import AdminBootstrap from '../pages/admin/AdminBootstrap'
 import AdminUsersPage from '../pages/admin/AdminUsersPage'
 import AdminTasksPage from '../pages/admin/AdminTasksPage'
+import AdminTenantsPage from '../pages/admin/AdminTenantsPage'
+import AdminSistemaPage from '../pages/admin/AdminSistemaPage'
 import ClientDashboard from '../pages/client/ClientDashboard'
 import ClientLeadsPage from '../pages/client/ClientLeadsPage'
 import ClientLeadDetailPage from '../pages/client/ClientLeadDetailPage'
@@ -27,10 +29,6 @@ import ClientProposalDetailPage from '../pages/client/ClientProposalDetailPage'
 import ClientQuotesPage from '../pages/client/ClientQuotesPage'
 import ClientAppointmentsPage from '../pages/client/ClientAppointmentsPage'
 import ClientProfilePage from '../pages/client/ClientProfilePage'
-import PlatformDashboard from '../pages/platform/PlatformDashboard'
-import PlatformTenantsPage from '../pages/platform/PlatformTenantsPage'
-import PlatformUsersPage from '../pages/platform/PlatformUsersPage'
-import PlatformSettingsPage from '../pages/platform/PlatformSettingsPage'
 import NotFound from '../pages/NotFound'
 
 export default function AppRoutes() {
@@ -61,6 +59,8 @@ export default function AppRoutes() {
         <Route path="/admin/configuracoes" element={<AdminSettingsPage />} />
         <Route path="/admin/usuarios" element={<AdminUsersPage />} />
         <Route path="/admin/tarefas" element={<AdminTasksPage />} />
+        <Route path="/admin/tenants" element={<AdminTenantsPage />} />
+        <Route path="/admin/sistema" element={<AdminSistemaPage />} />
 
         {/* Client */}
         <Route path="/cliente" element={<ClientDashboard />} />
@@ -72,11 +72,11 @@ export default function AppRoutes() {
         <Route path="/cliente/agendamentos" element={<ClientAppointmentsPage />} />
         <Route path="/cliente/perfil" element={<ClientProfilePage />} />
 
-        {/* Platform */}
-        <Route path="/platform" element={<PlatformDashboard />} />
-        <Route path="/platform/tenants" element={<PlatformTenantsPage />} />
-        <Route path="/platform/users" element={<PlatformUsersPage />} />
-        <Route path="/platform/settings" element={<PlatformSettingsPage />} />
+        {/* Platform redirects -> /admin */}
+        <Route path="/platform" element={<Navigate to="/admin/sistema" replace />} />
+        <Route path="/platform/users" element={<Navigate to="/admin/usuarios" replace />} />
+        <Route path="/platform/tenants" element={<Navigate to="/admin/tenants" replace />} />
+        <Route path="/platform/settings" element={<Navigate to="/admin/sistema" replace />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

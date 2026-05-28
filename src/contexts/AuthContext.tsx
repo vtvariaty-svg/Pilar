@@ -11,6 +11,8 @@ import { auth, db } from '../services/firebase'
 import { createUserProfile } from '../services/userService'
 import { createCustomer } from '../services/customerService'
 import { setTenantMember } from '../services/membershipService'
+import { createAdminUser } from '../services/adminUserService'
+import { checkPendingInvite, acceptAdminInvite } from '../services/userManagementService'
 import type { UserProfile } from '../types/UserProfile'
 import type { TenantMember } from '../types/TenantMember'
 import type { AdminUser } from '../types/AdminUser'
@@ -120,8 +122,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cred = await createUserWithEmailAndPassword(auth, email, password)
     const uid = cred.user.uid
     await createUserProfile(uid, { email, ...profile })
-    await createCustomer(uid, { email, ...profile, tenantId: DEFAULT_TENANT })
-    await setTenantMember(DEFAULT_TENANT, uid, 'customer', { displayName: profile.name, email })
+
+    const invite = await checkPendingInvite(email)
+    if (invite) {
+      await createAdminUser({ uid, email, name: profile.name, role: invite.role, active: true })
+      await setTenantMember(
+        DEFAULT_TENANT,
+        uid,
+        invite.role === 'super_admin' ? 'owner' : 'admin',
+        { displayName: profile.name, email },
+      )
+      await acceptAdminInvite(invite.id)
+    } else {
+      await createCustomer(uid, { email, ...profile, tenantId: DEFAULT_TENANT })
+      await setTenantMember(DEFAULT_TENANT, uid, 'customer', { displayName: profile.name, email })
+    }
+
     return uid
   }
 

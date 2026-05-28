@@ -71,9 +71,17 @@ service cloud.firestore {
     }
 
     match /adminInvites/{inviteId} {
-      allow read: if isSuperAdmin();
+      allow read: if isSuperAdmin()
+        || (signedIn() && resource.data.email == request.auth.token.email);
       allow create: if isSuperAdmin();
-      allow update, delete: if isSuperAdmin();
+      allow update: if isSuperAdmin()
+        || (signedIn()
+            && resource.data.email == request.auth.token.email
+            && resource.data.status == 'pending'
+            && request.resource.data.status == 'accepted'
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['status', 'acceptedAt']));
+      allow delete: if isSuperAdmin();
     }
 
     match /tenants/{tenantId} {
